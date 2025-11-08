@@ -1,0 +1,105 @@
+﻿@using ProductScraper.Models.Filters
+@model DesktopFilters
+<form method="post" asp-action="ApplyFilters" asp-controller="Scrape" id="filterForm">
+
+    @if (Model.Brend != null)
+    {
+        <div class="filter-group">
+            <h4>Proizvođač</h4>
+            @foreach (var item in Model.Brend)
+            {
+                <div class="filter-item">
+                    <input type="checkbox" id="manufacturer_@item" name="Brend" value="@item" />
+                    <label for="manufacturer_@item">@item</label>
+                </div>
+            }
+        </div>
+    }
+
+
+    @if (Model.TipProcesora != null)
+    {
+        <div class="filter-group">
+            <h4>Procesor</h4>
+            @foreach (var item in Model.TipProcesora)
+            {
+                <div class="filter-item">
+                    <input type="checkbox" id="proc_@item" name="TipProcesora" value="@item" />
+                    <label for="proc_@item">@item</label>
+                </div>
+            }
+        </div>
+    }
+
+
+    @if (Model.SSD != null)
+    {
+        <div class="filter-group">
+            <h4>SSD</h4>
+            @foreach (var item in Model.SSD)
+            {
+                <div class="filter-item">
+                    <input type="checkbox" id="ssd_@item" name="SSD" value="@item" />
+                    <label for="ssd_@item">@item</label>
+                </div>
+            }
+        </div>
+    }
+
+    @if (Model.GrafickaKartica != null)
+    {
+        <div class="filter-group">
+            <h4>Graficka</h4>
+            @foreach (var item in Model.GrafickaKartica)
+            {
+                <div class="filter-item">
+                    <input type="checkbox" id="ssd_@item" name="SSD" value="@item" />
+                    <label for="ssd_@item">@item</label>
+                </div>
+            }
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary">Apply</button>
+</form>
+
+<style>
+    .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        max-width: 1000px;
+    }
+
+    .filter-group {
+        flex: 1 1 250px;
+        background: #f7f8fa;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+    }
+
+        .filter-group h4 {
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+    .filter-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+        .filter-item input[type="checkbox"] {
+            margin-right: 8px;
+            accent-color: #0078d4;
+            width: 16px;
+            height: 16px;
+        }
+
+        .filter-item label {
+            cursor: pointer;
+            font-size: 14px;
+        }
+</style>
