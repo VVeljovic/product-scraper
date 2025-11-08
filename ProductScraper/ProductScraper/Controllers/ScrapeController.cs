@@ -18,16 +18,16 @@ namespace ProductScraper.Controllers
         public ActionResult Start(string category)
         {
             Console.WriteLine(category);
-            var desktopFilters = config.GetSection("Phones").Get<PhonesFilters>();
+            var desktopFilters = config.GetSection("Tablets").Get<TabletsFilters>();
             
-            return PartialView("~/Views/Scrape/PhonesFilters.cshtml", desktopFilters);
+            return PartialView("~/Views/Scrape/TabletsFilters.cshtml", desktopFilters);
         }
 
         public ActionResult ApplyFilters(PhonesFilters model)
         {
             var ananasScraper = new AnanasScraper();
 
-            ananasScraper.Scrape("Phones", model);
+            ananasScraper.Scrape("Tablets", model);
 
             return Ok();
         }

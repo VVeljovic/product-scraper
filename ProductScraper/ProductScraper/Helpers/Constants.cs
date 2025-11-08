@@ -29,6 +29,14 @@ public static class Constants
             public const string PrednjaKamera = "PrednjaKamera";
             public const string ZadnjaKamera = "ZadnjaKamera";
         }
+        public static class Tablets
+        {
+            public const string Brend = "Brend";
+            public const string DijagonalaEkrana = "DijagonalaEkrana";
+            public const string RezolucijaEkrana = "RezolucijaEkrana";
+            public const string InternaMemorija = "InternaMemorija";
+            public const string RamMemorija = "RamMemorija";
+        }
     }
 
     public static class Ananas
@@ -38,6 +46,7 @@ public static class Constants
         public const string LaptopsRelativeUrl = "kategorije/it-shop/racunari-i-racunarska-oprema/laptop-racunari?";
         public const string DesktopsRelativeUrl = "kategorije/it-shop/racunari-i-racunarska-oprema/desktop-racunari?";
         public const string PhonesRelativeUrl = "kategorije/telefoni-i-foto/mobilni-telefoni/smart-mobilni-telefoni?";
+        public const string TabletsRelativeUrl = "kategorije/telefoni-i-foto/tableti?";
         public static class Laptops
         {
             public const string Name = "AnanasLaptops";
@@ -76,6 +85,17 @@ public static class Constants
             public const string QueryAttibut = "refinementList[product.selectAttributes.";
             public const string ClassSelector = "sc-14no49n-0";
         }
+        public static class Tablets
+        {
+            public const string Name = "AnanasTablets";
+            public const string Brend = "brand";
+            public const string DijagonalaEkrana = "DisplayDiagonal";
+            public const string RezolucijaEkrana = "DisplayResolution";
+            public const string InternaMemorija = "InternalMemory";
+
+            public const string QueryAttibut = "refinementList[product.selectAttributes.";
+            public const string ClassSelector = "sc-14no49n-0";
+        }
     }
 
     public static ScrapingElements GetUrlForScraping(string siteAndProductName)
@@ -85,6 +105,7 @@ public static class Constants
             Ananas.Laptops.Name => new ScrapingElements(Ananas.BaseUrl + Ananas.LaptopsRelativeUrl, Ananas.Laptops.QueryAttibut, Ananas.Laptops.ClassSelector),
             Ananas.Desktops.Name => new ScrapingElements(Ananas.BaseUrl + Ananas.DesktopsRelativeUrl, Ananas.Desktops.QueryAttibut, Ananas.Desktops.ClassSelector),
             Ananas.Phones.Name => new ScrapingElements(Ananas.BaseUrl + Ananas.PhonesRelativeUrl, Ananas.Phones.QueryAttibut, Ananas.Phones.ClassSelector),
+            Ananas.Tablets.Name => new ScrapingElements(Ananas.BaseUrl + Ananas.TabletsRelativeUrl, Ananas.Tablets.QueryAttibut, Ananas.Tablets.ClassSelector),
             _ => throw new Exception(),
         };
     }

@@ -1,5 +1,5 @@
 ﻿@using ProductScraper.Models.Filters
-@model DesktopFilters
+@model TabletsFilters
 <form method="post" asp-action="ApplyFilters" asp-controller="Scrape" id="filterForm">
 
     @if (Model.Brend != null)
@@ -15,51 +15,58 @@
             }
         </div>
     }
-
-
-    @if (Model.TipProcesora != null)
+    @if (Model.DijagonalaEkrana != null)
     {
         <div class="filter-group">
-            <h4>Procesor</h4>
-            @foreach (var item in Model.TipProcesora)
+            <h4>Dijagonala ekrana</h4>
+            @foreach (var item in Model.DijagonalaEkrana)
             {
                 <div class="filter-item">
-                    <input type="checkbox" id="proc_@item" name="TipProcesora" value="@item" />
-                    <label for="proc_@item">@item</label>
+                    <input type="checkbox" id="manufacturer_@item" name="DijagonalaEkrana" value="@item" />
+                    <label for="manufacturer_@item">@item</label>
                 </div>
             }
         </div>
     }
-
-
-    @if (Model.SSD != null)
+    @if (Model.InternaMemorija != null)
     {
         <div class="filter-group">
-            <h4>SSD</h4>
-            @foreach (var item in Model.SSD)
+            <h4>Interna memorija</h4>
+            @foreach (var item in Model.InternaMemorija)
             {
                 <div class="filter-item">
-                    <input type="checkbox" id="ssd_@item" name="SSD" value="@item" />
-                    <label for="ssd_@item">@item</label>
+                    <input type="checkbox" id="manufacturer_@item" name="InternaMemorija" value="@item" />
+                    <label for="manufacturer_@item">@item</label>
                 </div>
             }
         </div>
     }
-
-    @if (Model.GrafickaKartica != null)
+    @if (Model.RezolucijaEkrana != null)
     {
         <div class="filter-group">
-            <h4>Graficka</h4>
-            @foreach (var item in Model.GrafickaKartica)
+            <h4>Rezolucija ekrana</h4>
+            @foreach (var item in Model.RezolucijaEkrana)
             {
                 <div class="filter-item">
-                    <input type="checkbox" id="ssd_@item" name="SSD" value="@item" />
-                    <label for="ssd_@item">@item</label>
+                    <input type="checkbox" id="manufacturer_@item" name="RezolucijaEkrana" value="@item" />
+                    <label for="manufacturer_@item">@item</label>
                 </div>
             }
         </div>
     }
-
+    @if (Model.RAMMemorija != null)
+    {
+        <div class="filter-group">
+            <h4>Ram memorija</h4>
+            @foreach (var item in Model.RAMMemorija)
+            {
+                <div class="filter-item">
+                    <input type="checkbox" id="manufacturer_@item" name="RaMMemorija" value="@item" />
+                    <label for="manufacturer_@item">@item</label>
+                </div>
+            }
+        </div>
+    }
     <button type="submit" class="btn btn-primary">Apply</button>
 </form>
 

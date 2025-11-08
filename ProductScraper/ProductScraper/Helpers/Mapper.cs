@@ -28,6 +28,14 @@ public static class Mapper
             [Constants.Filters.Phones.InternaMemorija] = Constants.Ananas.Phones.InternaMemorija,
             [Constants.Filters.Phones.PrednjaKamera] = Constants.Ananas.Phones.PrednjaKamera,
             [Constants.Filters.Phones.ZadnjaKamera] = Constants.Ananas.Phones.ZadnjaKamera
+        },
+        [Constants.Ananas.Tablets.Name] = new Dictionary<string, string>
+        {
+            [Constants.Filters.Tablets.DijagonalaEkrana] = Constants.Ananas.Tablets.DijagonalaEkrana,
+            [Constants.Filters.Tablets.Brend] = Constants.Ananas.Tablets.Brend,
+            [Constants.Filters.Tablets.InternaMemorija] = Constants.Ananas.Tablets.InternaMemorija,
+            [Constants.Filters.Tablets.RezolucijaEkrana] = Constants.Ananas.Tablets.RezolucijaEkrana,
+            [Constants.Filters.Tablets.DijagonalaEkrana] = Constants.Ananas.Tablets.DijagonalaEkrana
         }
     };
 }
