@@ -36,6 +36,17 @@ public static class Mapper
             [Constants.Filters.Tablets.InternaMemorija] = Constants.Ananas.Tablets.InternaMemorija,
             [Constants.Filters.Tablets.RezolucijaEkrana] = Constants.Ananas.Tablets.RezolucijaEkrana,
             [Constants.Filters.Tablets.DijagonalaEkrana] = Constants.Ananas.Tablets.DijagonalaEkrana
+        },
+
+
+        [Constants.Gigatron.Laptops.Name] = new Dictionary<string, string>
+        {
+            [Constants.Filters.Laptops.Brend] = Constants.Gigatron.Laptops.Brend,
+            [Constants.Filters.Laptops.DijagonalaEkrana] = Constants.Gigatron.Laptops.DijagonalaEkrana,
+            [Constants.Filters.Laptops.RezolucijaEkrana] = Constants.Gigatron.Laptops.RezolucijaEkrana,
+            [Constants.Filters.Laptops.RAMMemorija] = Constants.Gigatron.Laptops.RAMMemorija,
+            [Constants.Filters.Laptops.TipProcesora] = Constants.Gigatron.Laptops.TipProcesora,
+            [Constants.Filters.Laptops.SSD] = Constants.Gigatron.Laptops.SSD
         }
     };
 }
