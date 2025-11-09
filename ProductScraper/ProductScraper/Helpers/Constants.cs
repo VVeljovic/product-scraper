@@ -216,7 +216,9 @@ public static class Constants
             Gigatron.Laptops.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.LaptopsRelativeUrl, string.Empty, Gigatron.Laptops.ClassSelector),
             Gigatron.Desktops.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.DesktopRelativeUrl, string.Empty, Gigatron.Desktops.ClassSelector),
             Gigatron.Phones.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.PhonesRelativeUrl, string.Empty, Gigatron.Phones.ClassSelector),
-            Gigatron.Tablets.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.TabletsRelativeUrl, string.Empty, Gigatron.Tablets.ClassSelector),            
+            Gigatron.Tablets.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.TabletsRelativeUrl, string.Empty, Gigatron.Tablets.ClassSelector),
+            
+            JakovSistem.Laptops.Name => new ScrapingElements(JakovSistem.BaseUrl + JakovSistem.LaptopsRelativeUrl, string.Empty, JakovSistem.Laptops.ClassSelector),
             _ => throw new Exception(),
         };
     }

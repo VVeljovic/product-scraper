@@ -1,7 +1,9 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 using ProductScraper.Helpers;
 using ProductScraper.Models.Filters;
+using System.Security.Policy;
 using System.Web;
 
 namespace ProductScraper.Scrapers;
@@ -18,9 +20,10 @@ public class Scraper : IScrape
         var url = string.Empty;
         if (siteName == Constants.Ananas.Name)
             url = BuildAnanasScrapingUrl(elementsForScraping, urlQueryParams);
-        else 
+        else if (siteName == Constants.Gigatron.Name)
             url = BuildGigatronScrapingUrl(elementsForScraping, urlQueryParams);
-       
+        else
+            url = BuildJakovSistemScrapingUrl(elementsForScraping, urlQueryParams);
 
         return ScrapeProducts(url, elementsForScraping.ClassName);
     }
@@ -32,7 +35,8 @@ public class Scraper : IScrape
         var driver = new ChromeDriver(chromeOptions);
 
         driver.Navigate().GoToUrl(finalUrl);
-        var html = driver.PageSource;
+        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+        wait.Until(d => d.FindElements(by: By.ClassName(elementClassName)).Count > 0);
         var products = driver.FindElements(by: By.ClassName(elementClassName));
         var a = products.Select(x => x.Text).ToList();
         foreach (var res in a)
@@ -120,6 +124,22 @@ public class Scraper : IScrape
             foreach (var value in pairs.Value)
             {
                 var valueEncoded = Uri.EscapeDataString(Uri.EscapeDataString(value));
+                urlParams.Add($"{keyEncoded}={valueEncoded}");
+            }
+        }
+        return elementsForScraping.Url + string.Join("&", urlParams);
+    }
+
+    private static string BuildJakovSistemScrapingUrl(ScrapingElements elementsForScraping, Dictionary<string, List<string>> urlQueryParams)
+    {
+        var urlParams = new List<string>();
+
+        foreach (var pairs in urlQueryParams)
+        {
+            var keyEncoded = HttpUtility.UrlEncode(pairs.Key);
+            foreach (var value in pairs.Value)
+            {
+                var valueEncoded = HttpUtility.UrlEncode(value); 
                 urlParams.Add($"{keyEncoded}={valueEncoded}");
             }
         }

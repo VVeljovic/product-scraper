@@ -48,6 +48,7 @@ public static class Mapper
             [Constants.Filters.Laptops.TipProcesora] = Constants.Gigatron.Laptops.TipProcesora,
             [Constants.Filters.Laptops.SSD] = Constants.Gigatron.Laptops.SSD
         },
+
         [Constants.Gigatron.Desktops.Name] = new Dictionary<string, string>
         {
             [Constants.Filters.Desktops.Brend] = Constants.Gigatron.Desktops.Brend,
@@ -71,6 +72,16 @@ public static class Mapper
             [Constants.Filters.Tablets.InternaMemorija] = Constants.Gigatron.Tablets.InternaMemorija,
             [Constants.Filters.Tablets.RezolucijaEkrana] = Constants.Gigatron.Tablets.RezolucijaEkrana,
             [Constants.Filters.Tablets.DijagonalaEkrana] = Constants.Gigatron.Tablets.DijagonalaEkrana
-        }
+        },
+
+        [Constants.JakovSistem.Laptops.Name] = new Dictionary<string, string>
+        {
+            [Constants.Filters.Laptops.Brend] = Constants.JakovSistem.Laptops.Brend,
+            [Constants.Filters.Laptops.DijagonalaEkrana] = Constants.JakovSistem.Laptops.DijagonalaEkrana,
+            [Constants.Filters.Laptops.RezolucijaEkrana] = Constants.JakovSistem.Laptops.RezolucijaEkrana,
+            [Constants.Filters.Laptops.RAMMemorija] = Constants.JakovSistem.Laptops.RAMMemorija,
+            [Constants.Filters.Laptops.TipProcesora] = Constants.JakovSistem.Laptops.TipProcesora,
+            [Constants.Filters.Laptops.SSD] = Constants.JakovSistem.Laptops.SSD
+        },
     };
 }
