@@ -2,7 +2,6 @@
 using OpenQA.Selenium.Chrome;
 using ProductScraper.Helpers;
 using ProductScraper.Models.Filters;
-using System.Security.Policy;
 using System.Web;
 
 namespace ProductScraper.Scrapers;
@@ -16,13 +15,12 @@ public class Scraper : IScrape
         var urlQueryParams = BuildUrlQueryParams(siteName + category, filterValuePairs);
         var elementsForScraping = Constants.GetUrlForScraping(siteName + category);
 
-        var url = string.Empty; 
+        var url = string.Empty;
         if (siteName == Constants.Ananas.Name)
             url = BuildAnanasScrapingUrl(elementsForScraping, urlQueryParams);
-        else if (siteName == Constants.Gigatron.Name)
+        else 
             url = BuildGigatronScrapingUrl(elementsForScraping, urlQueryParams);
-        else
-            url = BuildEplanetaScrapingUrl(elementsForScraping, urlQueryParams);
+       
 
         return ScrapeProducts(url, elementsForScraping.ClassName);
     }
@@ -78,9 +76,6 @@ public class Scraper : IScrape
         return urlQueryParams;
     }
 
-
-
-
     private static string BuildAnanasScrapingUrl(ScrapingElements elementsForScraping, Dictionary<string, List<string>> urlQueryParams)
     {
         var urlParams = new List<string>();
@@ -129,12 +124,5 @@ public class Scraper : IScrape
             }
         }
         return elementsForScraping.Url + string.Join("&", urlParams);
-    }
-
-    private static string BuildEplanetaScrapingUrl(ScrapingElements elementsForScraping, Dictionary<string, List<string>> urlQueryParams)
-    {
-        var urlParams = new List<string>();
-
-        return string.Empty;
     }
 }

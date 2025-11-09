@@ -47,6 +47,30 @@ public static class Mapper
             [Constants.Filters.Laptops.RAMMemorija] = Constants.Gigatron.Laptops.RAMMemorija,
             [Constants.Filters.Laptops.TipProcesora] = Constants.Gigatron.Laptops.TipProcesora,
             [Constants.Filters.Laptops.SSD] = Constants.Gigatron.Laptops.SSD
+        },
+        [Constants.Gigatron.Desktops.Name] = new Dictionary<string, string>
+        {
+            [Constants.Filters.Desktops.Brend] = Constants.Gigatron.Desktops.Brend,
+            [Constants.Filters.Desktops.GrafickaKartica] = Constants.Gigatron.Desktops.GrafickaKartica,
+            [Constants.Filters.Desktops.RAMMemorija] = Constants.Gigatron.Desktops.RAMMemorija,
+            [Constants.Filters.Desktops.TipProcesora] = Constants.Gigatron.Desktops.TipProcesora,
+            [Constants.Filters.Desktops.SSD] = Constants.Gigatron.Desktops.SSD
+        },
+        [Constants.Gigatron.Phones.Name] = new Dictionary<string, string>
+        {
+            [Constants.Filters.Phones.Brend] = Constants.Gigatron.Phones.Brend,
+            [Constants.Filters.Phones.DijagonalaEkrana] = Constants.Gigatron.Phones.DijagonalaEkrana,
+            [Constants.Filters.Phones.InternaMemorija] = Constants.Gigatron.Phones.InternaMemorija,
+            [Constants.Filters.Phones.PrednjaKamera] = Constants.Gigatron.Phones.PrednjaKamera,
+            [Constants.Filters.Phones.ZadnjaKamera] = Constants.Gigatron.Phones.ZadnjaKamera
+        },
+        [Constants.Gigatron.Tablets.Name] = new Dictionary<string, string>
+        {
+            [Constants.Filters.Tablets.DijagonalaEkrana] = Constants.Gigatron.Tablets.DijagonalaEkrana,
+            [Constants.Filters.Tablets.Brend] = Constants.Gigatron.Tablets.Brend,
+            [Constants.Filters.Tablets.InternaMemorija] = Constants.Gigatron.Tablets.InternaMemorija,
+            [Constants.Filters.Tablets.RezolucijaEkrana] = Constants.Gigatron.Tablets.RezolucijaEkrana,
+            [Constants.Filters.Tablets.DijagonalaEkrana] = Constants.Gigatron.Tablets.DijagonalaEkrana
         }
     };
 }

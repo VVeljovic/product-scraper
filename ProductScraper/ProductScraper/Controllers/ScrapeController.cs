@@ -27,7 +27,7 @@ namespace ProductScraper.Controllers
         {
             var ananasScraper = new Scraper();
 
-            ananasScraper.Scrape("Laptops","Ananas", model);
+            ananasScraper.Scrape("Laptops","JakovSistem", model);
 
             return Ok();
         }
