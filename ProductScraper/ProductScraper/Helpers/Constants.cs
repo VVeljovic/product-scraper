@@ -47,6 +47,11 @@ public static class Constants
         public const string DesktopsRelativeUrl = "kategorije/it-shop/racunari-i-racunarska-oprema/desktop-racunari?";
         public const string PhonesRelativeUrl = "kategorije/telefoni-i-foto/mobilni-telefoni/smart-mobilni-telefoni?";
         public const string TabletsRelativeUrl = "kategorije/telefoni-i-foto/tableti?";
+
+        public const string DivClass = "//div[contains(@class,'ais-Hits-item')]";
+        public const string LinkClass = "a[href*='/proizvod/']";
+        public const string TitleClass = "sc-14no49n-0";
+        public const string PriceClass = ".sc-1arj7wv-2";
         public static class Laptops
         {
             public const string Name = "AnanasLaptops";
@@ -58,7 +63,6 @@ public static class Constants
             public const string SSD = "SsdHdd";
 
             public const string QueryAttibut = "refinementList[product.selectAttributes.";
-            public const string ClassSelector = "sc-14no49n-0";
         }
 
         public static class Desktops
@@ -71,7 +75,6 @@ public static class Constants
             public const string SSD = "SsdHdd";
 
             public const string QueryAttibut = "refinementList[product.selectAttributes.";
-            public const string ClassSelector = "sc-14no49n-0";
         }
         public static class Phones
         {
@@ -83,7 +86,6 @@ public static class Constants
             public const string ZadnjaKamera = "RearCamera";
 
             public const string QueryAttibut = "refinementList[product.selectAttributes.";
-            public const string ClassSelector = "sc-14no49n-0";
         }
         public static class Tablets
         {
@@ -94,7 +96,6 @@ public static class Constants
             public const string InternaMemorija = "InternalMemory";
 
             public const string QueryAttibut = "refinementList[product.selectAttributes.";
-            public const string ClassSelector = "sc-14no49n-0";
         }
     }
 
@@ -106,6 +107,11 @@ public static class Constants
         public const string DesktopRelativeUrl = "racunari-i-komponente/desktop-racunari?";
         public const string PhonesRelativeUrl = "mobilni-telefoni-tableti-i-oprema/mobilni-telefoni?";
         public const string TabletsRelativeUrl = "mobilni-telefoni-tableti-i-oprema/tablet-racunari?";
+
+        public const string DivClass = "//div[contains(@class,'min-w-[230px]')]";
+        public const string LinkClass = "a[href*='/proizvod/']";
+        public const string TitleClass = "line-clamp-2";
+        public const string PriceClass = ".truncate .font-bold";
         public static class Laptops
         {
             public const string Name = "GigatronLaptops";
@@ -116,7 +122,6 @@ public static class Constants
             public const string SSD = "SSD";
             public const string TipProcesora = "Tip procesora";
 
-            public const string ClassSelector = "mt-[12px]";
         }
         public static class Desktops
         {
@@ -127,7 +132,6 @@ public static class Constants
             public const string GrafickaKartica = "Tip grafike";
             public const string SSD = "SSD";
 
-            public const string ClassSelector = "mt-[12px]";
         }
 
         public static class Phones
@@ -139,7 +143,6 @@ public static class Constants
             public const string PrednjaKamera = "Prednja kamera";
             public const string ZadnjaKamera = "Zadnja kamera";
 
-            public const string ClassSelector = "mt-[12px]";
         }
         public static class Tablets
         {
@@ -149,7 +152,6 @@ public static class Constants
             public const string RezolucijaEkrana = "Rezolucija ekrana";
             public const string InternaMemorija = "Interna memorija";
 
-            public const string ClassSelector = "mt-[12px]";
         }
     }
 
@@ -208,17 +210,17 @@ public static class Constants
     {
         return siteAndProductName switch
         {
-            Ananas.Laptops.Name => new ScrapingElements(Ananas.BaseUrl + Ananas.LaptopsRelativeUrl, Ananas.Laptops.QueryAttibut, Ananas.Laptops.ClassSelector),
-            Ananas.Desktops.Name => new ScrapingElements(Ananas.BaseUrl + Ananas.DesktopsRelativeUrl, Ananas.Desktops.QueryAttibut, Ananas.Desktops.ClassSelector),
-            Ananas.Phones.Name => new ScrapingElements(Ananas.BaseUrl + Ananas.PhonesRelativeUrl, Ananas.Phones.QueryAttibut, Ananas.Phones.ClassSelector),
-            Ananas.Tablets.Name => new ScrapingElements(Ananas.BaseUrl + Ananas.TabletsRelativeUrl, Ananas.Tablets.QueryAttibut, Ananas.Tablets.ClassSelector),
-            
-            Gigatron.Laptops.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.LaptopsRelativeUrl, string.Empty, Gigatron.Laptops.ClassSelector),
-            Gigatron.Desktops.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.DesktopRelativeUrl, string.Empty, Gigatron.Desktops.ClassSelector),
-            Gigatron.Phones.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.PhonesRelativeUrl, string.Empty, Gigatron.Phones.ClassSelector),
-            Gigatron.Tablets.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.TabletsRelativeUrl, string.Empty, Gigatron.Tablets.ClassSelector),
-            
-            JakovSistem.Laptops.Name => new ScrapingElements(JakovSistem.BaseUrl + JakovSistem.LaptopsRelativeUrl, string.Empty, JakovSistem.Laptops.ClassSelector),
+            Ananas.Laptops.Name => new ScrapingElements(Ananas.BaseUrl + Ananas.LaptopsRelativeUrl, Ananas.Laptops.QueryAttibut, new ScrapingSelectors(Ananas.DivClass, Ananas.LinkClass, Ananas.TitleClass, Ananas.PriceClass)),
+            Ananas.Desktops.Name => new ScrapingElements(Ananas.BaseUrl + Ananas.DesktopsRelativeUrl, Ananas.Desktops.QueryAttibut, new ScrapingSelectors(Ananas.DivClass, Ananas.LinkClass, Ananas.TitleClass, Ananas.PriceClass)),
+            Ananas.Phones.Name => new ScrapingElements(Ananas.BaseUrl + Ananas.PhonesRelativeUrl, Ananas.Phones.QueryAttibut, new ScrapingSelectors(Ananas.DivClass, Ananas.LinkClass, Ananas.TitleClass, Ananas.PriceClass)),
+            Ananas.Tablets.Name => new ScrapingElements(Ananas.BaseUrl + Ananas.TabletsRelativeUrl, Ananas.Tablets.QueryAttibut, new ScrapingSelectors(Ananas.DivClass, Ananas.LinkClass, Ananas.TitleClass, Ananas.PriceClass)),
+
+            Gigatron.Laptops.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.LaptopsRelativeUrl, string.Empty, new ScrapingSelectors(Gigatron.DivClass, Gigatron.LinkClass, Gigatron.TitleClass, Gigatron.PriceClass)),
+            Gigatron.Desktops.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.DesktopRelativeUrl, string.Empty, new ScrapingSelectors(Gigatron.DivClass, Gigatron.LinkClass, Gigatron.TitleClass, Gigatron.PriceClass)),
+            Gigatron.Phones.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.PhonesRelativeUrl, string.Empty, new ScrapingSelectors(Gigatron.DivClass, Gigatron.LinkClass, Gigatron.TitleClass, Gigatron.PriceClass)),
+            Gigatron.Tablets.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.TabletsRelativeUrl, string.Empty, new ScrapingSelectors(Gigatron.DivClass, Gigatron.LinkClass, Gigatron.TitleClass, Gigatron.PriceClass)),
+
+            JakovSistem.Laptops.Name => new ScrapingElements(JakovSistem.BaseUrl + JakovSistem.LaptopsRelativeUrl, string.Empty, null),
             _ => throw new Exception(),
         };
     }

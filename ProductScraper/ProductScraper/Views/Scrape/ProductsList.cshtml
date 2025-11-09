@@ -1,0 +1,153 @@
+﻿@model List<Product>
+<main class="results-content">
+    <h3>Rezultati pretrage</h3>
+    <div class="card-grid">
+        @if (Model != null)
+        @foreach (var product in Model)
+        {
+            <div class="product-card">
+                <img src="https://dummyimage.com/300x200/0078d4/ffffff&text=ASUS+Vivobook+15" alt="ASUS Vivobook 15" />
+                <div class="product-info">
+                    <h5>@product.Title</h5>
+                    <p class="price">@product.Price</p>
+                    <a href="@product.SourceLink" class="btn btn-outline-primary">Detalji</a>
+                </div>
+            </div>
+        }
+
+    </div>
+</main>
+
+<style>
+    .page-layout {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+        padding: 20px;
+    }
+
+    .filters-sidebar {
+        width: 250px;
+        background: #f7f8fa;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+    }
+
+    .results-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .results-content h3 {
+            margin-bottom: 15px;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 5px;
+        }
+
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .product-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+    .product-info {
+        padding: 12px 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex-grow: 1;
+    }
+
+        .product-info h5 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .product-info .price {
+            font-size: 15px;
+            font-weight: bold;
+            color: #0078d4;
+            margin: 0;
+        }
+
+    .btn-outline-primary {
+        border: 1px solid #0078d4;
+        background: transparent;
+        color: #0078d4;
+        font-size: 14px;
+        border-radius: 5px;
+        padding: 6px 10px;
+        align-self: flex-start;
+        transition: all 0.2s ease;
+    }
+
+        .btn-outline-primary:hover {
+            background: #0078d4;
+            color: #fff;
+        }
+
+    .filter-group {
+        margin-bottom: 20px;
+    }
+
+        .filter-group h4 {
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+    .filter-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+        .filter-item input[type="checkbox"] {
+            margin-right: 8px;
+            accent-color: #0078d4;
+            width: 16px;
+            height: 16px;
+        }
+
+        .filter-item label {
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+    .btn-primary {
+        background-color: #0078d4;
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background-color: #005fa3;
+        }
+</style>

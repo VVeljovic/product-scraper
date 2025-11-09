@@ -2,15 +2,15 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using ProductScraper.Helpers;
+using ProductScraper.Models;
 using ProductScraper.Models.Filters;
-using System.Security.Policy;
 using System.Web;
 
 namespace ProductScraper.Scrapers;
 
 public class Scraper : IScrape
 {
-    public List<string> Scrape(string category, string siteName, BaseProductFilters filters)
+    public List<Product> Scrape(string category, string siteName, BaseProductFilters filters)
     {
         var filterValuePairs = GetSelectedFilters(filters);
 
@@ -25,27 +25,41 @@ public class Scraper : IScrape
         else
             url = BuildJakovSistemScrapingUrl(elementsForScraping, urlQueryParams);
 
-        return ScrapeProducts(url, elementsForScraping.ClassName);
+        return ScrapeProducts(url, elementsForScraping.ScrapingSelectors);
     }
 
-    private static List<string> ScrapeProducts(string finalUrl, string elementClassName)
+    private static List<Product> ScrapeProducts(string finalUrl, ScrapingSelectors scrapingSelectors)
     {
         var chromeOptions = new ChromeOptions();
         chromeOptions.AddArguments("--headless=new");
         var driver = new ChromeDriver(chromeOptions);
 
         driver.Navigate().GoToUrl(finalUrl);
-        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-        wait.Until(d => d.FindElements(by: By.ClassName(elementClassName)).Count > 0);
-        var products = driver.FindElements(by: By.ClassName(elementClassName));
-        var a = products.Select(x => x.Text).ToList();
-        foreach (var res in a)
-        {
-            Console.WriteLine(res);
-        }
+        var products = ExtractProductsDetails(driver, scrapingSelectors);
         driver.Quit();
-        return a;
+        return products;
     }
+
+    private static List<Product> ExtractProductsDetails(ChromeDriver driver, ScrapingSelectors scrapingSelectors)
+    {
+        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+        wait.Until(d => d.FindElements(by: By.XPath(scrapingSelectors.DivClass)).Count > 0);
+        var productDivs = driver.FindElements(by: By.XPath(scrapingSelectors.DivClass));
+        var productLists = new List<Product>();
+
+        foreach (var productDiv in productDivs)
+        {
+            var aTag = productDiv.FindElement(By.CssSelector(scrapingSelectors.LinkClass));
+            var title = productDiv.FindElement(By.ClassName(scrapingSelectors.TitleClass)).Text;
+            var link = aTag.GetAttribute("href");
+            var price = productDiv.FindElement(By.CssSelector(scrapingSelectors.PriceClass)).Text;
+
+            productLists.Add(new Product(title, price, link));
+        }
+
+        return productLists;
+    }
+
 
     private static Dictionary<string, List<string>> GetSelectedFilters(BaseProductFilters filters)
     {

@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using ProductScraper.Helpers;
 using ProductScraper.Models.Filters;
 using ProductScraper.Scrapers;
-using System.Web;
+using ProductScraper.Views;
+using ProductScraper.Views.Models;
 
 namespace ProductScraper.Controllers
 {
@@ -20,16 +18,16 @@ namespace ProductScraper.Controllers
             Console.WriteLine(category);
             var desktopFilters = config.GetSection("Laptops").Get<LaptopFilters>();
             
-            return PartialView("~/Views/Scrape/LaptopsFilters.cshtml", desktopFilters);
+            return PartialView("~/Views/Scrape/LaptopsFilters.cshtml", new LaptopViewModel { Filters = desktopFilters});
         }
 
         public ActionResult ApplyFilters(LaptopFilters model)
         {
             var ananasScraper = new Scraper();
 
-            ananasScraper.Scrape("Laptops","JakovSistem", model);
+            var lista = ananasScraper.Scrape("Laptops","Ananas", model);
 
-            return Ok();
+            return PartialView("~/Views/Scrape/ProductsList.cshtml", lista);
         }
     }
 }

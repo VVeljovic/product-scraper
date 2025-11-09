@@ -1,33 +1,114 @@
-﻿
+﻿<h1 class="page-title">Scrape</h1>
 
-<h1>Scrape</h1>
+<div class="scrape-container">
+    <form id="scrapeForm" class="scrape-form">
+        <label for="category" class="form-label">Odaberi kategoriju:</label>
+        <select name="category" id="category" class="form-select">
+            <option value="Laptops">Laptops</option>
+            <option value="TVs">TVs</option>
+            <option value="Phones">Phones</option>
+            <option value="Tablets">Tablets</option>
+            <option value="Desktops">Desktop computers</option>
+        </select>
 
-<label for="cars">Select category:</label>
-<form id="scrapeForm">
-<select name="category" id="category">
-    <option value="Laptops">Laptops</option>
-    <option value="TVs">TVs</option>
-    <option value="Phones">Phones</option>
-    <option value="Tablets">Tablets</option>
-    <option value="Desktops">Desktop computers</option>
-</select>
-    <button type="submit">Submit</button>
-</form>
-<div id="resultContainer">
+        <button type="submit" class="btn btn-primary scrape-btn">Pokreni Scraping</button>
+    </form>
 
+    <div id="resultContainer" class="result-container"></div>
 </div>
+
 <script>
-    document.getElementById('scrapeForm').addEventListener('submit', async(e)=>{
+    document.getElementById('scrapeForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const form = e.tartet;
+        const form = e.target;
         const formData = new FormData(form);
 
         const response = await fetch('@Url.Action("Start", "Scrape")', {
-            method : 'POST',
-            body : formData
-        })
+            method: 'POST',
+            body: formData
+        });
 
         const html = await response.text();
         document.getElementById('resultContainer').innerHTML = html;
-    })
+    });
 </script>
+
+<style>
+    .page-title {
+        text-align: center;
+        font-size: 28px;
+        font-weight: 700;
+        color: #0078d4;
+        margin-top: 30px;
+        margin-bottom: 20px;
+        border-bottom: 3px solid #0078d4;
+        display: inline-block;
+        padding-bottom: 5px;
+    }
+
+    .scrape-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 30px;
+    }
+
+    .scrape-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #f7f8fa;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 20px 30px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        gap: 15px;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background-color: #fff;
+        transition: border-color 0.2s ease;
+    }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #0078d4;
+            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+        }
+
+    .scrape-btn {
+        width: 100%;
+        background-color: #0078d4;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+        .scrape-btn:hover {
+            background-color: #005fa3;
+        }
+
+    .result-container {
+        margin-top: 30px;
+        width: 100%;
+        max-width: 1100px;
+    }
+</style>
