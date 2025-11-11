@@ -1,7 +1,17 @@
+using Microsoft.EntityFrameworkCore;
+using ProductScraper.Data;
+using ProductScraper.Scrapers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IScrape, Scraper>();
+
+builder.Services.AddDbContext<ProductsDbContext>(opt =>
+{
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 var app = builder.Build();
 

@@ -1,12 +1,12 @@
-﻿@using ProductScraper.Models.Filters
-@model PhonesFilters
+﻿@using ProductScraper.Views.Models
+@model PhoneViewModel
 <form method="post" asp-action="ApplyFilters" asp-controller="Scrape" id="filterForm">
 
-    @if (Model.Brend != null)
+    @if (Model.Filters.Brend != null)
     {
         <div class="filter-group">
             <h4>Proizvođač</h4>
-            @foreach (var item in Model.Brend)
+            @foreach (var item in Model.Filters.Brend)
             {
                 <div class="filter-item">
                     <input type="checkbox" id="manufacturer_@item" name="Brend" value="@item" />
@@ -15,11 +15,11 @@
             }
         </div>
     }
-    @if (Model.DijagonalaEkrana != null)
+    @if (Model.Filters.DijagonalaEkrana != null)
     {
         <div class="filter-group">
             <h4>Dijagonala ekrana</h4>
-            @foreach (var item in Model.DijagonalaEkrana)
+            @foreach (var item in Model.Filters.DijagonalaEkrana)
             {
                 <div class="filter-item">
                     <input type="checkbox" id="manufacturer_@item" name="DijagonalaEkrana" value="@item" />
@@ -28,11 +28,11 @@
             }
         </div>
     }
-    @if (Model.InternaMemorija != null)
+    @if (Model.Filters.InternaMemorija != null)
     {
         <div class="filter-group">
             <h4>Interna memorija</h4>
-            @foreach (var item in Model.InternaMemorija)
+            @foreach (var item in Model.Filters.InternaMemorija)
             {
                 <div class="filter-item">
                     <input type="checkbox" id="manufacturer_@item" name="InternaMemorija" value="@item" />
@@ -41,11 +41,11 @@
             }
         </div>
     }
-    @if (Model.PrednjaKamera != null)
+    @if (Model.Filters.PrednjaKamera != null)
     {
         <div class="filter-group">
             <h4>Prednja kamera</h4>
-            @foreach (var item in Model.PrednjaKamera)
+            @foreach (var item in Model.Filters.PrednjaKamera)
             {
                 <div class="filter-item">
                     <input type="checkbox" id="manufacturer_@item" name="PrednjaKamera" value="@item" />
@@ -54,11 +54,11 @@
             }
         </div>
     }
-    @if (Model.ZadnjaKamera != null)
+    @if (Model.Filters.ZadnjaKamera != null)
     {
         <div class="filter-group">
             <h4>Zadnja kamera</h4>
-            @foreach (var item in Model.ZadnjaKamera)
+            @foreach (var item in Model.Filters.ZadnjaKamera)
             {
                 <div class="filter-item">
                     <input type="checkbox" id="manufacturer_@item" name="ZadnjaKamera" value="@item" />
@@ -70,6 +70,30 @@
 
     <button type="submit" class="btn btn-primary">Apply</button>
 </form>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#filterForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var form = $(this);
+            var data = form.serialize();
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("ScrapePhones", "Phones")',
+                data: data,
+                success: function (result) {
+                    $('#productsContainer').html(result);
+                },
+                error: function (xhr, status, error) {
+                    console.error("Greška pri učitavanju proizvoda:", error);
+                }
+            });
+        });
+    });
+</script>
 
 <style>
     .filters {

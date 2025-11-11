@@ -5,5 +5,5 @@ namespace ProductScraper.Scrapers;
 
 public interface IScrape
 {
-    public List<Product> Scrape(string category, string siteName, BaseProductFilters selectedFilters);
+    public Task<List<Product>> Scrape(string category, string siteName, BaseProductFilters selectedFilters);
 }

@@ -5,7 +5,6 @@
         <label for="category" class="form-label">Odaberi kategoriju:</label>
         <select name="category" id="category" class="form-select">
             <option value="Laptops">Laptops</option>
-            <option value="TVs">TVs</option>
             <option value="Phones">Phones</option>
             <option value="Tablets">Tablets</option>
             <option value="Desktops">Desktop computers</option>
@@ -18,18 +17,10 @@
 </div>
 
 <script>
-    document.getElementById('scrapeForm').addEventListener('submit', async (e) => {
+    document.getElementById('scrapeForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        const form = e.target;
-        const formData = new FormData(form);
-
-        const response = await fetch('@Url.Action("Start", "Scrape")', {
-            method: 'POST',
-            body: formData
-        });
-
-        const html = await response.text();
-        document.getElementById('resultContainer').innerHTML = html;
+        const category = document.getElementById('category').value;
+        window.location.href = `/${category}`;
     });
 </script>
 

@@ -160,6 +160,11 @@ public static class Constants
         public const string Name = "JakovSistem";
         public const string BaseUrl = "https://jakov.rs/";
         public const string LaptopsRelativeUrl = "kategorije/laptop-racunari?";
+        public const string DivClass = "//div[contains(@class,'p-1')]";
+        public const string LinkClass = "div.p-1 > a[href*='/kategorije/laptop-racunari/proizvodi/']";
+        public const string TitleClass = "font-semibold";
+        public const string PriceClass = ".text-xl .lg:text-2xl";
+
         public static class Laptops
         {
             public const string Name = "JakovSistemLaptops";
@@ -169,8 +174,6 @@ public static class Constants
             public const string RAMMemorija = "RAM memorija";
             public const string SSD = "Kapacitet hard diska";
             public const string TipProcesora = "CPU tip";
-
-            public const string ClassSelector = "line-clamp-3";
         }
         public static class Desktops
         {
@@ -180,8 +183,6 @@ public static class Constants
             public const string TipProcesora = "CPU tip";
             public const string GrafickaKartica = "Integrisana grafika";
             public const string SSD = "Kapacitet SSDa";
-
-            public const string ClassSelector = "mt-[12px]";
         }
         public static class Phones
         {
@@ -191,8 +192,6 @@ public static class Constants
             public const string InternaMemorija = "Interna memorija";
             public const string PrednjaKamera = "Prednja kamera";
             public const string ZadnjaKamera = "Zadnja kamera";
-
-            public const string ClassSelector = "mt-[12px]";
         }
         public static class Tablets
         {
@@ -201,8 +200,6 @@ public static class Constants
             public const string DijagonalaEkrana = "Dijagonala ekrana";
             public const string RezolucijaEkrana = "Rezolucija ekrana";
             public const string InternaMemorija = "Interna memorija";
-
-            public const string ClassSelector = "mt-[12px]";
         }
     }
 
@@ -220,7 +217,7 @@ public static class Constants
             Gigatron.Phones.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.PhonesRelativeUrl, string.Empty, new ScrapingSelectors(Gigatron.DivClass, Gigatron.LinkClass, Gigatron.TitleClass, Gigatron.PriceClass)),
             Gigatron.Tablets.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.TabletsRelativeUrl, string.Empty, new ScrapingSelectors(Gigatron.DivClass, Gigatron.LinkClass, Gigatron.TitleClass, Gigatron.PriceClass)),
 
-            JakovSistem.Laptops.Name => new ScrapingElements(JakovSistem.BaseUrl + JakovSistem.LaptopsRelativeUrl, string.Empty, null),
+            JakovSistem.Laptops.Name => new ScrapingElements(JakovSistem.BaseUrl + JakovSistem.LaptopsRelativeUrl, string.Empty, new ScrapingSelectors(JakovSistem.DivClass, JakovSistem.LinkClass, JakovSistem.TitleClass, JakovSistem.PriceClass)),
             _ => throw new Exception(),
         };
     }

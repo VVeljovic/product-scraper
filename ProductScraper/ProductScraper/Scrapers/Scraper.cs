@@ -1,31 +1,61 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using ProductScraper.Data;
 using ProductScraper.Helpers;
 using ProductScraper.Models;
 using ProductScraper.Models.Filters;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using System.Web;
+using Mapster;
 
 namespace ProductScraper.Scrapers;
+using Product = Models.Product;
+using ProductEntity = Data.Product;
 
-public class Scraper : IScrape
+public class Scraper(ProductsDbContext productsDbContext) : IScrape
 {
-    public List<Product> Scrape(string category, string siteName, BaseProductFilters filters)
+    public async Task<List<Product>> Scrape(string category, string siteName, BaseProductFilters filters)
     {
         var filterValuePairs = GetSelectedFilters(filters);
 
-        var urlQueryParams = BuildUrlQueryParams(siteName + category, filterValuePairs);
-        var elementsForScraping = Constants.GetUrlForScraping(siteName + category);
+        var filterHashValue = GetHashValueFromFitlers(filters);
 
-        var url = string.Empty;
-        if (siteName == Constants.Ananas.Name)
-            url = BuildAnanasScrapingUrl(elementsForScraping, urlQueryParams);
-        else if (siteName == Constants.Gigatron.Name)
-            url = BuildGigatronScrapingUrl(elementsForScraping, urlQueryParams);
-        else
-            url = BuildJakovSistemScrapingUrl(elementsForScraping, urlQueryParams);
+        if (!IsAlreadyScraped(filterHashValue))
+        {
+            var urlQueryParams = BuildUrlQueryParams(siteName + category, filterValuePairs);
+            var elementsForScraping = Constants.GetUrlForScraping(siteName + category);
 
-        return ScrapeProducts(url, elementsForScraping.ScrapingSelectors);
+            var url = string.Empty;
+            if (siteName == Constants.Ananas.Name)
+                url = BuildAnanasScrapingUrl(elementsForScraping, urlQueryParams);
+            else if (siteName == Constants.Gigatron.Name)
+                url = BuildGigatronScrapingUrl(elementsForScraping, urlQueryParams);
+            else
+                url = BuildJakovSistemScrapingUrl(elementsForScraping, urlQueryParams);
+
+            var products = ScrapeProducts(url, elementsForScraping.ScrapingSelectors);
+
+            await SaveProductsAsync(products, filterHashValue);
+           
+            return products;
+        }
+
+        return GetAlreadyScrapedProducts(filterHashValue);
+
+    }
+
+    private async Task SaveProductsAsync(List<Product> products, string filterHashValue)
+    {
+        var productEntities = products.Adapt<List<ProductEntity>>();
+        productEntities.ForEach(x => x.FilterHash = filterHashValue);
+
+        await productsDbContext.AddRangeAsync(productEntities);
+
+        await productsDbContext.SaveChangesAsync();
     }
 
     private static List<Product> ScrapeProducts(string finalUrl, ScrapingSelectors scrapingSelectors)
@@ -49,10 +79,10 @@ public class Scraper : IScrape
 
         foreach (var productDiv in productDivs)
         {
-            var aTag = productDiv.FindElement(By.CssSelector(scrapingSelectors.LinkClass));
+            var aTag = productDiv.FindElement(By.CssSelector("a.w-full.h-full"));
             var title = productDiv.FindElement(By.ClassName(scrapingSelectors.TitleClass)).Text;
             var link = aTag.GetAttribute("href");
-            var price = productDiv.FindElement(By.CssSelector(scrapingSelectors.PriceClass)).Text;
+            var price = "";
 
             productLists.Add(new Product(title, price, link));
         }
@@ -60,6 +90,29 @@ public class Scraper : IScrape
         return productLists;
     }
 
+    private bool IsAlreadyScraped(string hashValue)
+    {
+        return productsDbContext.Products.Any(x => x.FilterHash == hashValue);            
+    }
+
+    private List<Product> GetAlreadyScrapedProducts(string hashValue)
+    {
+        var productEntities = productsDbContext.Products.Where(x => x.FilterHash == hashValue).ToList();
+
+        return productEntities.Adapt<List<Product>>();
+    }
+
+    private static string GetHashValueFromFitlers(BaseProductFilters filters)
+    {
+        using (var md5 = MD5.Create())
+        {
+            var serializedFilters = JsonSerializer.Serialize(filters);
+
+            var hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(serializedFilters));
+
+            return BitConverter.ToString(hashBytes).Replace("-","");
+        }
+    }
 
     private static Dictionary<string, List<string>> GetSelectedFilters(BaseProductFilters filters)
     {
@@ -153,7 +206,7 @@ public class Scraper : IScrape
             var keyEncoded = HttpUtility.UrlEncode(pairs.Key);
             foreach (var value in pairs.Value)
             {
-                var valueEncoded = HttpUtility.UrlEncode(value); 
+                var valueEncoded = HttpUtility.UrlEncode(value);
                 urlParams.Add($"{keyEncoded}={valueEncoded}");
             }
         }

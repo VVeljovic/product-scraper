@@ -5,7 +5,7 @@
 
 <div class="page-layout">
     <aside class="filters-sidebar">
-        <form id="filterForm" method="post" action="@Url.Action("ApplyFilters", "Scrape")">
+        <form id="filterForm" method="post" action="@Url.Action("FilterLaptops", "Laptop")">
             @if (Model.Filters.Brend != null)
             {
                 <div class="filter-group">
@@ -99,7 +99,6 @@
     </div>
 </div>
 
-<!-- CSS ostaje isti kao što si dao -->
 <style>
     .page-layout {
         display: flex;
@@ -222,27 +221,11 @@
         }
 </style>
 
-<!-- jQuery i AJAX za submit forme -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script>
-    $(document).ready(function () {
-        $('#filterForm').on('submit', function (e) {
-            e.preventDefault(); // Sprečava reload stranice
-
-            var form = $(this);
-            var data = form.serialize();
-
-            $.ajax({
-                type: "POST",
-                url: '@Url.Action("ApplyFilters", "Scrape")',
-                data: data,
-                success: function (result) {
-                    $('#productsContainer').html(result); // Ubacuje nove proizvode
-                },
-                error: function (xhr, status, error) {
-                    console.error("Greška pri učitavanju proizvoda:", error);
-                }
-            });
-        });
+    $('#filterForm').on('submit', function (e) {
+        e.preventDefault();
+        var query = $(this).serialize();
+        window.location.href = '/Laptops/ScrapeLaptops?' + query;
     });
 </script>
