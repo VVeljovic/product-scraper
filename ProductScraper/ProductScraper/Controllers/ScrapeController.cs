@@ -15,7 +15,7 @@ namespace ProductScraper.Controllers
         [HttpGet]
         public ActionResult FilterLaptops(LaptopFilters model)
         {
-            var lista = scraper.Scrape("Laptops", "Ananas", model);
+            var lista = scraper.Scrape("Laptops", model);
 
             return PartialView("~/Views/Scrape/ProductsList.cshtml", lista);
         }

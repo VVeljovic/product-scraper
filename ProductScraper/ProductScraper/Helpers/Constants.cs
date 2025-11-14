@@ -2,6 +2,8 @@
 
 public static class Constants
 {
+    public static List<string> SiteNames = [ "Ananas", "Gigatron", "JakovSistem" ];
+
     public static class Filters
     {
         public static class Laptops
@@ -48,10 +50,10 @@ public static class Constants
         public const string PhonesRelativeUrl = "kategorije/telefoni-i-foto/mobilni-telefoni/smart-mobilni-telefoni?";
         public const string TabletsRelativeUrl = "kategorije/telefoni-i-foto/tableti?";
 
-        public const string DivClass = "//div[contains(@class,'ais-Hits-item')]";
-        public const string LinkClass = "a[href*='/proizvod/']";
-        public const string TitleClass = "sc-14no49n-0";
-        public const string PriceClass = ".sc-1arj7wv-2";
+        public const string DivClass = "div.ais-Hits-item";
+        public const string LinkClass = ".sc-v9wo15-0";
+        public const string TitleClass = "h3.sc-14no49n-0";
+        public const string PriceClass = "span.sc-1arj7wv-2";
         public static class Laptops
         {
             public const string Name = "AnanasLaptops";
@@ -108,10 +110,10 @@ public static class Constants
         public const string PhonesRelativeUrl = "mobilni-telefoni-tableti-i-oprema/mobilni-telefoni?";
         public const string TabletsRelativeUrl = "mobilni-telefoni-tableti-i-oprema/tablet-racunari?";
 
-        public const string DivClass = "//div[contains(@class,'min-w-[230px]')]";
+        public const string DivClass = "div.min-w-\\[230px\\]";
         public const string LinkClass = "a[href*='/proizvod/']";
-        public const string TitleClass = "line-clamp-2";
-        public const string PriceClass = ".truncate .font-bold";
+        public const string TitleClass = ".mt-\\[12px\\].line-clamp-2.h-\\[38px\\].font-bold.leading-tight.dark\\:text-gpurple-50";
+        public const string PriceClass = "span.block.truncate";
         public static class Laptops
         {
             public const string Name = "GigatronLaptops";
@@ -160,10 +162,10 @@ public static class Constants
         public const string Name = "JakovSistem";
         public const string BaseUrl = "https://jakov.rs/";
         public const string LaptopsRelativeUrl = "kategorije/laptop-racunari?";
-        public const string DivClass = "//div[contains(@class,'p-1')]";
-        public const string LinkClass = "div.p-1 > a[href*='/kategorije/laptop-racunari/proizvodi/']";
-        public const string TitleClass = "font-semibold";
-        public const string PriceClass = ".text-xl .lg:text-2xl";
+        public const string DivClass = "div.p-1";
+        public const string LinkClass = "a[href*='/kategorije/laptop-racunari/proizvodi/']";
+        public const string TitleClass = "h3.font-semibold";
+        public const string PriceClass = "span.text-xl";
 
         public static class Laptops
         {
@@ -203,7 +205,7 @@ public static class Constants
         }
     }
 
-    public static ScrapingElements GetUrlForScraping(string siteAndProductName)
+    public static ScrapingElements GetElementsForScraping(string siteAndProductName)
     {
         return siteAndProductName switch
         {

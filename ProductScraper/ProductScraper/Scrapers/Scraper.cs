@@ -3,12 +3,10 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using ProductScraper.Data;
 using ProductScraper.Helpers;
-using ProductScraper.Models;
 using ProductScraper.Models.Filters;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Web;
 using Mapster;
 
@@ -18,7 +16,7 @@ using ProductEntity = Data.Product;
 
 public class Scraper(ProductsDbContext productsDbContext) : IScrape
 {
-    public async Task<List<Product>> Scrape(string category, string siteName, BaseProductFilters filters)
+    public async Task<List<Product>> Scrape(string category, BaseProductFilters filters)
     {
         var filterValuePairs = GetSelectedFilters(filters);
 
@@ -26,21 +24,25 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
 
         if (!IsAlreadyScraped(filterHashValue))
         {
-            var urlQueryParams = BuildUrlQueryParams(siteName + category, filterValuePairs);
-            var elementsForScraping = Constants.GetUrlForScraping(siteName + category);
+            var products = new List<Product>();
+            foreach (var siteName in Constants.SiteNames)
+            {
+                var urlQueryParams = BuildUrlQueryParams(siteName + category, filterValuePairs);
+                var elementsForScraping = Constants.GetElementsForScraping(siteName + category);
+                var url = string.Empty;
+                if (siteName == Constants.Ananas.Name)
+                    url = BuildAnanasScrapingUrl(elementsForScraping, urlQueryParams);
+                else if (siteName == Constants.Gigatron.Name)
+                    url = BuildGigatronScrapingUrl(elementsForScraping, urlQueryParams);
+                else
+                    url = BuildJakovSistemScrapingUrl(elementsForScraping, urlQueryParams);
 
-            var url = string.Empty;
-            if (siteName == Constants.Ananas.Name)
-                url = BuildAnanasScrapingUrl(elementsForScraping, urlQueryParams);
-            else if (siteName == Constants.Gigatron.Name)
-                url = BuildGigatronScrapingUrl(elementsForScraping, urlQueryParams);
-            else
-                url = BuildJakovSistemScrapingUrl(elementsForScraping, urlQueryParams);
+                var scrapedProducts = ScrapeProducts(url, elementsForScraping.ScrapingSelectors);
 
-            var products = ScrapeProducts(url, elementsForScraping.ScrapingSelectors);
+                await SaveProductsAsync(products, filterHashValue);
 
-            await SaveProductsAsync(products, filterHashValue);
-           
+                products.AddRange(scrapedProducts);
+            }
             return products;
         }
 
@@ -60,8 +62,11 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
 
     private static List<Product> ScrapeProducts(string finalUrl, ScrapingSelectors scrapingSelectors)
     {
+        Console.WriteLine(finalUrl);
+
         var chromeOptions = new ChromeOptions();
         chromeOptions.AddArguments("--headless=new");
+
         var driver = new ChromeDriver(chromeOptions);
 
         driver.Navigate().GoToUrl(finalUrl);
@@ -72,17 +77,23 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
 
     private static List<Product> ExtractProductsDetails(ChromeDriver driver, ScrapingSelectors scrapingSelectors)
     {
-        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-        wait.Until(d => d.FindElements(by: By.XPath(scrapingSelectors.DivClass)).Count > 0);
-        var productDivs = driver.FindElements(by: By.XPath(scrapingSelectors.DivClass));
+        var pageSource = driver.PageSource;
+        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+
+        wait.Until(d => d.FindElements(By.CssSelector(scrapingSelectors.LinkClass)).Count > 0);
+        var divElements = driver.FindElements(By.CssSelector(scrapingSelectors.DivClass));
         var productLists = new List<Product>();
 
-        foreach (var productDiv in productDivs)
+        foreach (var divElement in divElements)
         {
-            var aTag = productDiv.FindElement(By.CssSelector("a.w-full.h-full"));
-            var title = productDiv.FindElement(By.ClassName(scrapingSelectors.TitleClass)).Text;
-            var link = aTag.GetAttribute("href");
-            var price = "";
+            var title = divElement.FindElement(By.CssSelector(scrapingSelectors.TitleClass)).Text.Trim();
+
+            var price = divElement.FindElement(By.CssSelector(scrapingSelectors.PriceClass)).Text.Trim();
+
+            var linkElement = divElement.FindElement(By.CssSelector(scrapingSelectors.LinkClass));
+            if (linkElement == null)
+                continue;
+            var link = linkElement.GetAttribute("href");
 
             productLists.Add(new Product(title, price, link));
         }
@@ -92,7 +103,7 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
 
     private bool IsAlreadyScraped(string hashValue)
     {
-        return productsDbContext.Products.Any(x => x.FilterHash == hashValue);            
+        return productsDbContext.Products.Any(x => x.FilterHash == hashValue);
     }
 
     private List<Product> GetAlreadyScrapedProducts(string hashValue)
@@ -110,7 +121,7 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
 
             var hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(serializedFilters));
 
-            return BitConverter.ToString(hashBytes).Replace("-","");
+            return BitConverter.ToString(hashBytes).Replace("-", "");
         }
     }
 
@@ -200,16 +211,30 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
     private static string BuildJakovSistemScrapingUrl(ScrapingElements elementsForScraping, Dictionary<string, List<string>> urlQueryParams)
     {
         var urlParams = new List<string>();
+        var resultUrl = elementsForScraping.Url;
 
-        foreach (var pairs in urlQueryParams)
+        foreach (var pair in urlQueryParams)
         {
-            var keyEncoded = HttpUtility.UrlEncode(pairs.Key);
-            foreach (var value in pairs.Value)
+            var keyEncoded = HttpUtility.UrlEncode(pair.Key);
+
+            if (pair.Key == Constants.JakovSistem.Laptops.Brend)
+            {
+                var encodedValues = pair.Value
+                    .Select(v => HttpUtility.UrlEncode(v));
+
+                var joined = string.Join("§", encodedValues);
+
+                urlParams.Add($"{keyEncoded}={joined}");
+                continue;
+            }
+
+            foreach (var value in pair.Value)
             {
                 var valueEncoded = HttpUtility.UrlEncode(value);
                 urlParams.Add($"{keyEncoded}={valueEncoded}");
             }
         }
-        return elementsForScraping.Url + string.Join("&", urlParams);
+
+        return resultUrl + string.Join("&", urlParams);
     }
 }

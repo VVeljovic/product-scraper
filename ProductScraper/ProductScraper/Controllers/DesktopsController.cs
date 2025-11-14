@@ -16,7 +16,7 @@ namespace ProductScraper.Controllers
 
         public ActionResult ScrapeDesktops(DesktopFilters model)
         {
-            var lista = scraper.Scrape("Desktops", "Ananas", model);
+            var lista = scraper.Scrape("Desktops", model);
 
             return PartialView("~/Views/Scrape/ProductsList.cshtml", lista);
         }
