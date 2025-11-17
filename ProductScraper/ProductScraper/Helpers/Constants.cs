@@ -162,6 +162,9 @@ public static class Constants
         public const string Name = "JakovSistem";
         public const string BaseUrl = "https://jakov.rs/";
         public const string LaptopsRelativeUrl = "kategorije/laptop-racunari?";
+        public const string DesktopsRelativeUrl = "kategorije/desktop-racunari?";
+        public const string PhonesRelativeUrl = "kategorije/mobilni-smart-telefoni?";
+        public const string TabletsRelativeUrl = "kategorije/tableti?";
         public const string DivClass = "div.p-1";
         public const string LinkClass = "a[href*='/kategorije/laptop-racunari/proizvodi/']";
         public const string TitleClass = "h3.font-semibold";
@@ -220,6 +223,10 @@ public static class Constants
             Gigatron.Tablets.Name => new ScrapingElements(Gigatron.BaseUrl + Gigatron.TabletsRelativeUrl, string.Empty, new ScrapingSelectors(Gigatron.DivClass, Gigatron.LinkClass, Gigatron.TitleClass, Gigatron.PriceClass)),
 
             JakovSistem.Laptops.Name => new ScrapingElements(JakovSistem.BaseUrl + JakovSistem.LaptopsRelativeUrl, string.Empty, new ScrapingSelectors(JakovSistem.DivClass, JakovSistem.LinkClass, JakovSistem.TitleClass, JakovSistem.PriceClass)),
+            JakovSistem.Desktops.Name => new ScrapingElements(JakovSistem.BaseUrl + JakovSistem.DesktopsRelativeUrl, string.Empty, new ScrapingSelectors(JakovSistem.DivClass, JakovSistem.LinkClass, JakovSistem.TitleClass, JakovSistem.PriceClass)),
+            JakovSistem.Phones.Name => new ScrapingElements(JakovSistem.BaseUrl + JakovSistem.PhonesRelativeUrl, string.Empty, new ScrapingSelectors(JakovSistem.DivClass, JakovSistem.LinkClass, JakovSistem.TitleClass, JakovSistem.PriceClass)),
+            JakovSistem.Tablets.Name => new ScrapingElements(JakovSistem.BaseUrl + JakovSistem.TabletsRelativeUrl, string.Empty, new ScrapingSelectors(JakovSistem.DivClass, JakovSistem.LinkClass, JakovSistem.TitleClass, JakovSistem.PriceClass)),
+            
             _ => throw new Exception(),
         };
     }
