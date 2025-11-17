@@ -67,10 +67,26 @@
             }
         </div>
     }
+    <div class="filter-group">
+        <h4>Cena (RSD)</h4>
 
+        <div class="filter-item" style="margin-bottom: 10px;">
+            <label for="minCena">Min cena</label>
+            <input type="number" id="minCena" name="MinCena" class="form-control"
+                   placeholder="npr. 30000" min="0" />
+        </div>
+
+        <div class="filter-item">
+            <label for="maxCena">Max cena</label>
+            <input type="number" id="maxCena" name="MaxCena" class="form-control"
+                   placeholder="npr. 120000" min="0" />
+        </div>
+    </div>
     <button type="submit" class="btn btn-primary">Apply</button>
 </form>
-
+<div class="results-container" id="productsContainer">
+    @Html.Partial("~/Views/Scrape/ProductsList.cshtml", Model.Products)
+</div>
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script>
     $(document).ready(function () {

@@ -11,7 +11,9 @@ public static class Mapper
             [Constants.Filters.Laptops.RezolucijaEkrana] = Constants.Ananas.Laptops.RezolucijaEkrana,
             [Constants.Filters.Laptops.RAMMemorija] = Constants.Ananas.Laptops.RAMMemorija,
             [Constants.Filters.Laptops.TipProcesora] = Constants.Ananas.Laptops.TipProcesora,
-            [Constants.Filters.Laptops.SSD] = Constants.Ananas.Laptops.SSD
+            [Constants.Filters.Laptops.SSD] = Constants.Ananas.Laptops.SSD,
+            [Constants.Filters.Laptops.MinCena] = Constants.Ananas.Laptops.MinCena,
+            [Constants.Filters.Laptops.MaxCena] = Constants.Ananas.Laptops.MaxCena,
         },
         [Constants.Ananas.Desktops.Name] = new Dictionary<string, string>
         {
@@ -19,7 +21,9 @@ public static class Mapper
             [Constants.Filters.Desktops.RAMMemorija] = Constants.Ananas.Desktops.RAMMemorija,
             [Constants.Filters.Desktops.TipProcesora] = Constants.Ananas.Desktops.TipProcesora,
             [Constants.Filters.Desktops.SSD] = Constants.Ananas.Desktops.SSD,
-            [Constants.Filters.Desktops.GrafickaKartica] = Constants.Ananas.Desktops.SSD
+            [Constants.Filters.Desktops.GrafickaKartica] = Constants.Ananas.Desktops.SSD,
+            [Constants.Filters.Desktops.MinCena] = Constants.Ananas.Desktops.MinCena,
+            [Constants.Filters.Desktops.MaxCena] = Constants.Ananas.Desktops.MaxCena,
         },
         [Constants.Ananas.Phones.Name] = new Dictionary<string, string>
         {
@@ -27,7 +31,9 @@ public static class Mapper
             [Constants.Filters.Phones.DijagonalaEkrana] = Constants.Ananas.Phones.DijagonalaEkrana,
             [Constants.Filters.Phones.InternaMemorija] = Constants.Ananas.Phones.InternaMemorija,
             [Constants.Filters.Phones.PrednjaKamera] = Constants.Ananas.Phones.PrednjaKamera,
-            [Constants.Filters.Phones.ZadnjaKamera] = Constants.Ananas.Phones.ZadnjaKamera
+            [Constants.Filters.Phones.ZadnjaKamera] = Constants.Ananas.Phones.ZadnjaKamera,
+            [Constants.Filters.Phones.MinCena] = Constants.Ananas.Phones.MinCena,
+            [Constants.Filters.Phones.MaxCena] = Constants.Ananas.Phones.MaxCena,
         },
         [Constants.Ananas.Tablets.Name] = new Dictionary<string, string>
         {
@@ -35,7 +41,9 @@ public static class Mapper
             [Constants.Filters.Tablets.Brend] = Constants.Ananas.Tablets.Brend,
             [Constants.Filters.Tablets.InternaMemorija] = Constants.Ananas.Tablets.InternaMemorija,
             [Constants.Filters.Tablets.RezolucijaEkrana] = Constants.Ananas.Tablets.RezolucijaEkrana,
-            [Constants.Filters.Tablets.DijagonalaEkrana] = Constants.Ananas.Tablets.DijagonalaEkrana
+            [Constants.Filters.Tablets.DijagonalaEkrana] = Constants.Ananas.Tablets.DijagonalaEkrana,
+            [Constants.Filters.Tablets.MinCena] = Constants.Ananas.Tablets.MinCena,
+            [Constants.Filters.Tablets.MaxCena] = Constants.Ananas.Tablets.MaxCena,
         },
 
 
@@ -46,7 +54,9 @@ public static class Mapper
             [Constants.Filters.Laptops.RezolucijaEkrana] = Constants.Gigatron.Laptops.RezolucijaEkrana,
             [Constants.Filters.Laptops.RAMMemorija] = Constants.Gigatron.Laptops.RAMMemorija,
             [Constants.Filters.Laptops.TipProcesora] = Constants.Gigatron.Laptops.TipProcesora,
-            [Constants.Filters.Laptops.SSD] = Constants.Gigatron.Laptops.SSD
+            [Constants.Filters.Laptops.SSD] = Constants.Gigatron.Laptops.SSD,
+            [Constants.Filters.Laptops.MinCena] = Constants.Gigatron.Laptops.MinCena,
+            [Constants.Filters.Laptops.MaxCena] = Constants.Gigatron.Laptops.MaxCena,
         },
 
         [Constants.Gigatron.Desktops.Name] = new Dictionary<string, string>
@@ -55,7 +65,9 @@ public static class Mapper
             [Constants.Filters.Desktops.GrafickaKartica] = Constants.Gigatron.Desktops.GrafickaKartica,
             [Constants.Filters.Desktops.RAMMemorija] = Constants.Gigatron.Desktops.RAMMemorija,
             [Constants.Filters.Desktops.TipProcesora] = Constants.Gigatron.Desktops.TipProcesora,
-            [Constants.Filters.Desktops.SSD] = Constants.Gigatron.Desktops.SSD
+            [Constants.Filters.Desktops.SSD] = Constants.Gigatron.Desktops.SSD,
+            [Constants.Filters.Desktops.MinCena] = Constants.Gigatron.Desktops.MinCena,
+            [Constants.Filters.Desktops.MaxCena] = Constants.Gigatron.Desktops.MaxCena,
         },
         [Constants.Gigatron.Phones.Name] = new Dictionary<string, string>
         {
@@ -63,7 +75,10 @@ public static class Mapper
             [Constants.Filters.Phones.DijagonalaEkrana] = Constants.Gigatron.Phones.DijagonalaEkrana,
             [Constants.Filters.Phones.InternaMemorija] = Constants.Gigatron.Phones.InternaMemorija,
             [Constants.Filters.Phones.PrednjaKamera] = Constants.Gigatron.Phones.PrednjaKamera,
-            [Constants.Filters.Phones.ZadnjaKamera] = Constants.Gigatron.Phones.ZadnjaKamera
+            [Constants.Filters.Phones.ZadnjaKamera] = Constants.Gigatron.Phones.ZadnjaKamera,
+            [Constants.Filters.Phones.MinCena] = Constants.Gigatron.Phones.MinCena,
+            [Constants.Filters.Phones.MaxCena] = Constants.Gigatron.Phones.MaxCena,
+
         },
         [Constants.Gigatron.Tablets.Name] = new Dictionary<string, string>
         {
@@ -71,7 +86,9 @@ public static class Mapper
             [Constants.Filters.Tablets.Brend] = Constants.Gigatron.Tablets.Brend,
             [Constants.Filters.Tablets.InternaMemorija] = Constants.Gigatron.Tablets.InternaMemorija,
             [Constants.Filters.Tablets.RezolucijaEkrana] = Constants.Gigatron.Tablets.RezolucijaEkrana,
-            [Constants.Filters.Tablets.DijagonalaEkrana] = Constants.Gigatron.Tablets.DijagonalaEkrana
+            [Constants.Filters.Tablets.DijagonalaEkrana] = Constants.Gigatron.Tablets.DijagonalaEkrana,
+            [Constants.Filters.Tablets.MinCena] = Constants.Gigatron.Tablets.MinCena,
+            [Constants.Filters.Tablets.MaxCena] = Constants.Gigatron.Tablets.MaxCena,
         },
 
         [Constants.JakovSistem.Laptops.Name] = new Dictionary<string, string>

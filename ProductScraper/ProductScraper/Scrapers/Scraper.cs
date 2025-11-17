@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Web;
 using Mapster;
+using System.Globalization;
 
 namespace ProductScraper.Scrapers;
 using Product = Models.Product;
@@ -134,8 +135,20 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
         foreach (var prop in props)
         {
             var value = prop.GetValue(filters);
-            if (value != null)
-                filterValuePairs.Add(prop.Name, value as List<string>);
+
+            if (value is null)
+                continue;
+
+            else if (value is List<string> list)
+            {
+                filterValuePairs.Add(prop.Name, list);
+            }
+
+            else
+            {
+                var stringValue = Convert.ToString(value);
+                filterValuePairs.Add(prop.Name, new List<string> { stringValue });
+            }
         }
 
         return filterValuePairs;
@@ -162,12 +175,12 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
     {
         var urlParams = new List<string>();
 
-        foreach (var pairs in urlQueryParams)
+        foreach (var queryParam in urlQueryParams)
         {
-            if (pairs.Key == "brand")
+            if (queryParam.Key == "brand")
             {
                 var i = 0;
-                var vls = pairs.Value;
+                var vls = queryParam.Value;
                 foreach (var value in vls)
                 {
                     var encodedKey = HttpUtility.UrlEncode($"{Constants.Ananas.Phones.Brend}[{i}]");
@@ -176,12 +189,22 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
                     i++;
                 }
             }
+
+            if(queryParam.Key == "price")
+            {
+                var encodedKey = HttpUtility.UrlEncode(queryParam.Key);
+                var encodedMinPrice = HttpUtility.UrlEncode(queryParam.Value.First());
+                var encodedMaxPrice = HttpUtility.UrlEncode(urlQueryParams["MaxPrice"].First());
+                urlQueryParams.Remove("MaxPrice");
+                urlParams.Add($"{encodedKey}={encodedMinPrice}%3A{encodedMaxPrice}");
+            }
+
             else
             {
                 var i = 0;
-                foreach (var el in pairs.Value)
+                foreach (var el in queryParam.Value)
                 {
-                    var encodedKey = HttpUtility.UrlEncode($"{elementsForScraping.QueryAttribut}{pairs.Key}][{i}]");
+                    var encodedKey = HttpUtility.UrlEncode($"{elementsForScraping.QueryAttribut}{queryParam.Key}][{i}]");
                     var encodedValue = HttpUtility.UrlEncode(el);
                     urlParams.Add($"{encodedKey}={encodedValue}");
                     i++;
@@ -196,10 +219,19 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
     {
         var urlParams = new List<string>();
 
-        foreach (var pairs in urlQueryParams)
+        foreach (var param in urlQueryParams)
         {
-            var keyEncoded = Uri.EscapeDataString(Uri.EscapeDataString(pairs.Key));
-            foreach (var value in pairs.Value)
+            var keyEncoded = Uri.EscapeDataString(Uri.EscapeDataString(param.Key));
+            if (param.Key == "cena")
+            {
+                var minCena = Uri.EscapeDataString(Uri.EscapeDataString(param.Value.First()));
+                var maxCena = Uri.EscapeDataString(Uri.EscapeDataString(urlQueryParams["MaxCena"].First()));
+                urlParams.Add($"{keyEncoded}={minCena}..{maxCena}");
+                urlQueryParams.Remove("MaxCena");
+                continue;
+            }
+
+            foreach (var value in param.Value)
             {
                 var valueEncoded = Uri.EscapeDataString(Uri.EscapeDataString(value));
                 urlParams.Add($"{keyEncoded}={valueEncoded}");
