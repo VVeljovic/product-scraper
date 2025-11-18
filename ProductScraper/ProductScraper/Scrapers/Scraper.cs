@@ -26,7 +26,8 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
         if (!IsAlreadyScraped(filterHashValue))
         {
             var products = new List<Product>();
-            foreach (var siteName in Constants.SiteNames)
+            var siteName = "JakovSistem";
+            // foreach (var siteName in Constants.SiteNames)
             {
                 var urlQueryParams = BuildUrlQueryParams(siteName + category, filterValuePairs);
                 var elementsForScraping = Constants.GetElementsForScraping(siteName + category);
@@ -190,7 +191,7 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
                 }
             }
 
-            if(queryParam.Key == "price")
+            if (queryParam.Key == "price")
             {
                 var encodedKey = HttpUtility.UrlEncode(queryParam.Key);
                 var encodedMinPrice = HttpUtility.UrlEncode(queryParam.Value.First());
@@ -257,6 +258,13 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
                 var joined = string.Join("§", encodedValues);
 
                 urlParams.Add($"{keyEncoded}={joined}");
+                continue;
+            }
+
+            if (pair.Key == "from")
+            {
+                resultUrl += $"price=asc&{pair.Key}={pair.Value.First()}&to={urlQueryParams["to"].First()}";
+                urlQueryParams.Remove("to");
                 continue;
             }
 

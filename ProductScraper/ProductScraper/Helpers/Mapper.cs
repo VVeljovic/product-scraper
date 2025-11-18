@@ -98,7 +98,9 @@ public static class Mapper
             [Constants.Filters.Laptops.RezolucijaEkrana] = Constants.JakovSistem.Laptops.RezolucijaEkrana,
             [Constants.Filters.Laptops.RAMMemorija] = Constants.JakovSistem.Laptops.RAMMemorija,
             [Constants.Filters.Laptops.TipProcesora] = Constants.JakovSistem.Laptops.TipProcesora,
-            [Constants.Filters.Laptops.SSD] = Constants.JakovSistem.Laptops.SSD
+            [Constants.Filters.Laptops.SSD] = Constants.JakovSistem.Laptops.SSD,
+            [Constants.Filters.Laptops.MinCena] = Constants.JakovSistem.Laptops.MinCena,
+            [Constants.Filters.Laptops.MaxCena] = Constants.JakovSistem.Laptops.MaxCena,
         },
     };
 }

@@ -199,6 +199,8 @@ public static class Constants
             public const string RAMMemorija = "RAM memorija";
             public const string SSD = "Kapacitet hard diska";
             public const string TipProcesora = "CPU tip";
+            public const string MinCena = "from";
+            public const string MaxCena = "to";
         }
         public static class Desktops
         {
@@ -208,6 +210,8 @@ public static class Constants
             public const string TipProcesora = "CPU tip";
             public const string GrafickaKartica = "Integrisana grafika";
             public const string SSD = "Kapacitet SSDa";
+            public const string MinCena = "from";
+            public const string MaxCena = "to";
         }
         public static class Phones
         {
@@ -217,6 +221,8 @@ public static class Constants
             public const string InternaMemorija = "Interna memorija";
             public const string PrednjaKamera = "Prednja kamera";
             public const string ZadnjaKamera = "Zadnja kamera";
+            public const string MinCena = "from";
+            public const string MaxCena = "to";
         }
         public static class Tablets
         {
@@ -225,6 +231,8 @@ public static class Constants
             public const string DijagonalaEkrana = "Dijagonala ekrana";
             public const string RezolucijaEkrana = "Rezolucija ekrana";
             public const string InternaMemorija = "Interna memorija";
+            public const string MinCena = "from";
+            public const string MaxCena = "to";
         }
     }
 
