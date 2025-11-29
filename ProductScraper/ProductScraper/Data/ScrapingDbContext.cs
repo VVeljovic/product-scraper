@@ -2,9 +2,9 @@
 
 namespace ProductScraper.Data;
 
-public class ProductsDbContext : DbContext
+public class ScrapingDbContext : DbContext
 {
-    public ProductsDbContext(DbContextOptions<ProductsDbContext> options) : base(options) { }
+    public ScrapingDbContext(DbContextOptions<ScrapingDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -13,7 +13,14 @@ public class ProductsDbContext : DbContext
             entity.HasIndex(x => x.FilterHash);
             entity.Property(x => x.Id).ValueGeneratedOnAdd();
         });
+        modelBuilder.Entity<FiltersMapping>(entity =>
+        {
+            entity.Property(x => x.Id).ValueGeneratedOnAdd();
+        });
+
         base.OnModelCreating(modelBuilder);
     }
     public DbSet<Product> Products { get; set; }
+
+    public DbSet<FiltersMapping> FiltersMapping { get; set; }
 }

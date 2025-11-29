@@ -1,136 +1,131 @@
 ﻿@using ProductScraper.Views.Models
 @model PhoneViewModel
-<form method="post" asp-action="ApplyFilters" asp-controller="Scrape" id="filterForm">
 
-    @if (Model.Filters.Brend != null)
-    {
-        <div class="filter-group">
-            <h4>Proizvođač</h4>
-            @foreach (var item in Model.Filters.Brend)
+<div class="page-layout">
+    <aside class="filters-sidebar">
+        <form id="filterForm" method="post" action="@Url.Action("ApplyFilters", "Phones")">
+            @if (Model.Filters.Brend != null)
             {
-                <div class="filter-item">
-                    <input type="checkbox" id="manufacturer_@item" name="Brend" value="@item" />
-                    <label for="manufacturer_@item">@item</label>
+                <div class="filter-group">
+                    <h4>Proizvođač</h4>
+                    @foreach (var item in Model.Filters.Brend)
+                    {
+                        <div class="filter-item">
+                            <input type="checkbox" id="brend_@item" name="Brend" value="@item" />
+                            <label for="brend_@item">@item</label>
+                        </div>
+                    }
                 </div>
             }
-        </div>
-    }
-    @if (Model.Filters.DijagonalaEkrana != null)
-    {
-        <div class="filter-group">
-            <h4>Dijagonala ekrana</h4>
-            @foreach (var item in Model.Filters.DijagonalaEkrana)
-            {
-                <div class="filter-item">
-                    <input type="checkbox" id="manufacturer_@item" name="DijagonalaEkrana" value="@item" />
-                    <label for="manufacturer_@item">@item</label>
-                </div>
-            }
-        </div>
-    }
-    @if (Model.Filters.InternaMemorija != null)
-    {
-        <div class="filter-group">
-            <h4>Interna memorija</h4>
-            @foreach (var item in Model.Filters.InternaMemorija)
-            {
-                <div class="filter-item">
-                    <input type="checkbox" id="manufacturer_@item" name="InternaMemorija" value="@item" />
-                    <label for="manufacturer_@item">@item</label>
-                </div>
-            }
-        </div>
-    }
-    @if (Model.Filters.PrednjaKamera != null)
-    {
-        <div class="filter-group">
-            <h4>Prednja kamera</h4>
-            @foreach (var item in Model.Filters.PrednjaKamera)
-            {
-                <div class="filter-item">
-                    <input type="checkbox" id="manufacturer_@item" name="PrednjaKamera" value="@item" />
-                    <label for="manufacturer_@item">@item</label>
-                </div>
-            }
-        </div>
-    }
-    @if (Model.Filters.ZadnjaKamera != null)
-    {
-        <div class="filter-group">
-            <h4>Zadnja kamera</h4>
-            @foreach (var item in Model.Filters.ZadnjaKamera)
-            {
-                <div class="filter-item">
-                    <input type="checkbox" id="manufacturer_@item" name="ZadnjaKamera" value="@item" />
-                    <label for="manufacturer_@item">@item</label>
-                </div>
-            }
-        </div>
-    }
-    <div class="filter-group">
-        <h4>Cena (RSD)</h4>
 
-        <div class="filter-item" style="margin-bottom: 10px;">
-            <label for="minCena">Min cena</label>
-            <input type="number" id="minCena" name="MinCena" class="form-control"
-                   placeholder="npr. 30000" min="0" />
-        </div>
+            @if (Model.Filters.DijagonalaEkrana != null)
+            {
+                <div class="filter-group">
+                    <h4>Dijagonala ekrana</h4>
+                    @foreach (var item in Model.Filters.DijagonalaEkrana)
+                    {
+                        <div class="filter-item">
+                            <input type="checkbox" id="screen_@item" name="DijagonalaEkrana" value="@item" />
+                            <label for="screen_@item">@item</label>
+                        </div>
+                    }
+                </div>
+            }
 
-        <div class="filter-item">
-            <label for="maxCena">Max cena</label>
-            <input type="number" id="maxCena" name="MaxCena" class="form-control"
-                   placeholder="npr. 120000" min="0" />
-        </div>
+            @if (Model.Filters.InternaMemorija != null)
+            {
+                <div class="filter-group">
+                    <h4>Interna memorija</h4>
+                    @foreach (var item in Model.Filters.InternaMemorija)
+                    {
+                        <div class="filter-item">
+                            <input type="checkbox" id="memory_@item" name="InternaMemorija" value="@item" />
+                            <label for="memory_@item">@item</label>
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (Model.Filters.PrednjaKamera != null)
+            {
+                <div class="filter-group">
+                    <h4>Prednja kamera</h4>
+                    @foreach (var item in Model.Filters.PrednjaKamera)
+                    {
+                        <div class="filter-item">
+                            <input type="checkbox" id="frontcam_@item" name="PrednjaKamera" value="@item" />
+                            <label for="frontcam_@item">@item</label>
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (Model.Filters.ZadnjaKamera != null)
+            {
+                <div class="filter-group">
+                    <h4>Zadnja kamera</h4>
+                    @foreach (var item in Model.Filters.ZadnjaKamera)
+                    {
+                        <div class="filter-item">
+                            <input type="checkbox" id="backcam_@item" name="ZadnjaKamera" value="@item" />
+                            <label for="backcam_@item">@item</label>
+                        </div>
+                    }
+                </div>
+            }
+
+            <div class="filter-group">
+                <h4>Cena (RSD)</h4>
+                <div class="filter-item" style="margin-bottom: 10px;">
+                    <label for="minCena">Min cena</label>
+                    <input type="number" id="minCena" name="MinCena" class="form-control" placeholder="npr. 30000" min="0" />
+                </div>
+                <div class="filter-item">
+                    <label for="maxCena">Max cena</label>
+                    <input type="number" id="maxCena" name="MaxCena" class="form-control" placeholder="npr. 120000" min="0" />
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-2">Primeni filtere</button>
+        </form>
+    </aside>
+
+    <div class="results-container" id="productsContainer">
+        @Html.Partial("~/Views/Scrape/ProductsList.cshtml", Model.Products)
     </div>
-    <button type="submit" class="btn btn-primary">Apply</button>
-</form>
-<div class="results-container" id="productsContainer">
-    @Html.Partial("~/Views/Scrape/ProductsList.cshtml", Model.Products)
 </div>
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script>
-    $(document).ready(function () {
-        $('#filterForm').on('submit', function (e) {
-            e.preventDefault();
-
-            var form = $(this);
-            var data = form.serialize();
-
-            $.ajax({
-                type: "POST",
-                url: '@Url.Action("ScrapePhones", "Phones")',
-                data: data,
-                success: function (result) {
-                    $('#productsContainer').html(result);
-                },
-                error: function (xhr, status, error) {
-                    console.error("Greška pri učitavanju proizvoda:", error);
-                }
-            });
-        });
-    });
-</script>
 
 <style>
-    .filters {
+    .page-layout {
         display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        max-width: 1000px;
+        gap: 30px;
+        align-items: flex-start;
+        padding: 20px;
+    }
+
+    .filters-sidebar {
+        width: 250px;
+        background: #f7f8fa;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+    }
+
+    .results-container {
+        flex: 1;
     }
 
     .filter-group {
-        flex: 1 1 250px;
-        background: #f7f8fa;
-        padding: 10px 15px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
+        margin-bottom: 20px;
     }
 
         .filter-group h4 {
             margin-bottom: 10px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
         }
 
     .filter-item {
@@ -147,7 +142,35 @@
         }
 
         .filter-item label {
-            cursor: pointer;
             font-size: 14px;
+            cursor: pointer;
+        }
+
+    .btn-primary {
+        background-color: #0078d4;
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background-color: #005fa3;
         }
 </style>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+    $('#filterForm').on('submit', function (e) {
+        e.preventDefault();
+        var data = $(this).serialize();
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("ScrapePhones", "Phones")',
+            data: data,
+            success: function (result) {
+                $('#productsContainer').html(result);
+            },
+            error: function (xhr, status, error) {
+                console.error("Greška pri učitavanju proizvoda:", error);
+            }
+        });
+    });
+</script>

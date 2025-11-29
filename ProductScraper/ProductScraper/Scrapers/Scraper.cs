@@ -9,13 +9,12 @@ using System.Text;
 using System.Text.Json;
 using System.Web;
 using Mapster;
-using System.Globalization;
 
 namespace ProductScraper.Scrapers;
 using Product = Models.Product;
 using ProductEntity = Data.Product;
 
-public class Scraper(ProductsDbContext productsDbContext) : IScrape
+public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
 {
     public async Task<List<Product>> Scrape(string category, BaseProductFilters filters)
     {
@@ -26,8 +25,7 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
         if (!IsAlreadyScraped(filterHashValue))
         {
             var products = new List<Product>();
-            var siteName = "JakovSistem";
-            // foreach (var siteName in Constants.SiteNames)
+            foreach (var siteName in Constants.SiteNames)
             {
                 var urlQueryParams = BuildUrlQueryParams(siteName + category, filterValuePairs);
                 var elementsForScraping = Constants.GetElementsForScraping(siteName + category);
@@ -57,9 +55,9 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
         var productEntities = products.Adapt<List<ProductEntity>>();
         productEntities.ForEach(x => x.FilterHash = filterHashValue);
 
-        await productsDbContext.AddRangeAsync(productEntities);
+        await scrapingDbContext.AddRangeAsync(productEntities);
 
-        await productsDbContext.SaveChangesAsync();
+        await scrapingDbContext.SaveChangesAsync();
     }
 
     private static List<Product> ScrapeProducts(string finalUrl, ScrapingSelectors scrapingSelectors)
@@ -81,10 +79,13 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
     {
         var pageSource = driver.PageSource;
         var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
+        var productLists = new List<Product>();
+
+        if (!ProductsExist(driver, scrapingSelectors))
+            return productLists;
 
         wait.Until(d => d.FindElements(By.CssSelector(scrapingSelectors.LinkClass)).Count > 0);
         var divElements = driver.FindElements(By.CssSelector(scrapingSelectors.DivClass));
-        var productLists = new List<Product>();
 
         foreach (var divElement in divElements)
         {
@@ -103,14 +104,19 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
         return productLists;
     }
 
+    private static bool ProductsExist(ChromeDriver driver, ScrapingSelectors scrapingSelectors)
+    {
+        return !driver.FindElements(By.CssSelector(scrapingSelectors.ProductsNotFoundClass)).Any();
+    }
+
     private bool IsAlreadyScraped(string hashValue)
     {
-        return productsDbContext.Products.Any(x => x.FilterHash == hashValue);
+        return scrapingDbContext.Products.Any(x => x.FilterHash == hashValue);
     }
 
     private List<Product> GetAlreadyScrapedProducts(string hashValue)
     {
-        var productEntities = productsDbContext.Products.Where(x => x.FilterHash == hashValue).ToList();
+        var productEntities = scrapingDbContext.Products.Where(x => x.FilterHash == hashValue).ToList();
 
         return productEntities.Adapt<List<Product>>();
     }
@@ -145,6 +151,9 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
                 filterValuePairs.Add(prop.Name, list);
             }
 
+            else if ((decimal)value == 0)
+                continue;
+
             else
             {
                 var stringValue = Convert.ToString(value);
@@ -155,17 +164,34 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
         return filterValuePairs;
     }
 
-    private static Dictionary<string, List<string>> BuildUrlQueryParams(string siteNameCategoryName, Dictionary<string, List<string>> filterValuePairs)
+    private Dictionary<string, List<string>> BuildUrlQueryParams(string siteNameCategoryName, Dictionary<string, List<string>> masterFilterValuePairs)
     {
         var urlQueryParams = new Dictionary<string, List<string>>();
-        if (filterValuePairs.Count != 0)
-        {
-            Mapper.PropertyNameUrlParamMap.TryGetValue(siteNameCategoryName, out var ananasLaptopsDict);
 
-            foreach (var key in filterValuePairs.Keys)
+        var filtersMapping = scrapingDbContext.FiltersMapping
+            .Where(x => x.Store == siteNameCategoryName)
+            .ToDictionary(x => x.MasterValue, x => x.StoreValue);
+
+        if (masterFilterValuePairs.Count != 0)
+        {
+            foreach (var masterFilter in masterFilterValuePairs.Keys)
             {
-                ananasLaptopsDict.TryGetValue(key, out var mappedValue);
-                urlQueryParams.Add(mappedValue, filterValuePairs[key]);
+                filtersMapping.TryGetValue(masterFilter, out var mappedFilter);
+
+                var mappedValues = new List<string>();
+                foreach (var masterValue in masterFilterValuePairs[masterFilter])
+                {
+                    filtersMapping.TryGetValue(masterValue, out var mappedValue);
+
+                    if (!string.IsNullOrEmpty(mappedValue))
+                        mappedValues.Add(mappedValue);
+
+                    if(Decimal.TryParse(masterValue, out var number))
+                    {
+                        mappedValues.Add(masterValue);
+                    }
+                }
+                urlQueryParams.Add(mappedFilter, mappedValues);
             }
         }
 
@@ -250,17 +276,6 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
         {
             var keyEncoded = HttpUtility.UrlEncode(pair.Key);
 
-            if (pair.Key == Constants.JakovSistem.Laptops.Brend)
-            {
-                var encodedValues = pair.Value
-                    .Select(v => HttpUtility.UrlEncode(v));
-
-                var joined = string.Join("§", encodedValues);
-
-                urlParams.Add($"{keyEncoded}={joined}");
-                continue;
-            }
-
             if (pair.Key == "from")
             {
                 resultUrl += $"price=asc&{pair.Key}={pair.Value.First()}&to={urlQueryParams["to"].First()}";
@@ -268,11 +283,12 @@ public class Scraper(ProductsDbContext productsDbContext) : IScrape
                 continue;
             }
 
-            foreach (var value in pair.Value)
-            {
-                var valueEncoded = HttpUtility.UrlEncode(value);
-                urlParams.Add($"{keyEncoded}={valueEncoded}");
-            }
+            var encodedValues = pair.Value
+                .Select(v => HttpUtility.UrlEncode(v));
+
+            var joined = string.Join("§", encodedValues);
+
+            urlParams.Add($"{keyEncoded}={joined}");
         }
 
         return resultUrl + string.Join("&", urlParams);

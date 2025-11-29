@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IScrape, Scraper>();
 
-builder.Services.AddDbContext<ProductsDbContext>(opt =>
+builder.Services.AddDbContext<ScrapingDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });

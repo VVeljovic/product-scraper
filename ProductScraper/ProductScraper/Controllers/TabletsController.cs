@@ -14,9 +14,9 @@ namespace ProductScraper.Controllers
             return PartialView("~/Views/Scrape/TabletsFilters.cshtml", new TabletViewModel { Filters = tabletFilters });
         }
 
-        public ActionResult ScrapeTablets(TabletsFilters model)
+        public async Task<IActionResult> ScrapeTablets(TabletsFilters model)
         {
-            var lista = scraper.Scrape("Tablets", model);
+            var lista = await scraper.Scrape("Tablets", model);
 
             return PartialView("~/Views/Scrape/ProductsList.cshtml", lista);
         }

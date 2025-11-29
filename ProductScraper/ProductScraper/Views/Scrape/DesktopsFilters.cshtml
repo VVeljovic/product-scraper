@@ -1,83 +1,84 @@
 ﻿@using ProductScraper.Views.Models
 @model DesktopViewModel
-<form id="filterForm" method="post" action="@Url.Action("ApplyFilters", "Scrape")">
 
-    @if (Model.Filters.Brend != null)
-    {
-        <div class="filter-group">
-            <h4>Proizvođač</h4>
-            @foreach (var item in Model.Filters.Brend)
+<div class="page-layout">
+    <aside class="filters-sidebar">
+        <form id="filterForm" method="post" action="@Url.Action("ApplyFilters", "Desktops")">
+            @if (Model.Filters.Brend != null)
             {
-                <div class="filter-item">
-                    <input type="checkbox" id="manufacturer_@item" name="Brend" value="@item" />
-                    <label for="manufacturer_@item">@item</label>
+                <div class="filter-group">
+                    <h4>Proizvođač</h4>
+                    @foreach (var item in Model.Filters.Brend)
+                    {
+                        <div class="filter-item">
+                            <input type="checkbox" id="brend_@item" name="Brend" value="@item" />
+                            <label for="brend_@item">@item</label>
+                        </div>
+                    }
                 </div>
             }
-        </div>
-    }
 
-
-    @if (Model.Filters.TipProcesora != null)
-    {
-        <div class="filter-group">
-            <h4>Procesor</h4>
-            @foreach (var item in Model.Filters.TipProcesora)
+            @if (Model.Filters.TipProcesora != null)
             {
-                <div class="filter-item">
-                    <input type="checkbox" id="proc_@item" name="TipProcesora" value="@item" />
-                    <label for="proc_@item">@item</label>
+                <div class="filter-group">
+                    <h4>Procesor</h4>
+                    @foreach (var item in Model.Filters.TipProcesora)
+                    {
+                        <div class="filter-item">
+                            <input type="checkbox" id="proc_@item" name="TipProcesora" value="@item" />
+                            <label for="proc_@item">@item</label>
+                        </div>
+                    }
                 </div>
             }
-        </div>
-    }
 
-
-    @if (Model.Filters.SSD != null)
-    {
-        <div class="filter-group">
-            <h4>SSD</h4>
-            @foreach (var item in Model.Filters.SSD)
+            @if (Model.Filters.SSD != null)
             {
-                <div class="filter-item">
-                    <input type="checkbox" id="ssd_@item" name="SSD" value="@item" />
-                    <label for="ssd_@item">@item</label>
+                <div class="filter-group">
+                    <h4>SSD</h4>
+                    @foreach (var item in Model.Filters.SSD)
+                    {
+                        <div class="filter-item">
+                            <input type="checkbox" id="ssd_@item" name="SSD" value="@item" />
+                            <label for="ssd_@item">@item</label>
+                        </div>
+                    }
                 </div>
             }
-        </div>
-    }
 
-    @if (Model.Filters.GrafickaKartica != null)
-    {
-        <div class="filter-group">
-            <h4>Graficka</h4>
-            @foreach (var item in Model.Filters.GrafickaKartica)
+            @if (Model.Filters.GrafickaKartica != null)
             {
-                <div class="filter-item">
-                    <input type="checkbox" id="ssd_@item" name="SSD" value="@item" />
-                    <label for="ssd_@item">@item</label>
+                <div class="filter-group">
+                    <h4>Grafička kartica</h4>
+                    @foreach (var item in Model.Filters.GrafickaKartica)
+                    {
+                        <div class="filter-item">
+                            <input type="checkbox" id="gpu_@item" name="GrafickaKartica" value="@item" />
+                            <label for="gpu_@item">@item</label>
+                        </div>
+                    }
                 </div>
             }
-        </div>
-    }
-    <div class="filter-group">
-        <h4>Cena (RSD)</h4>
 
-        <div class="filter-item" style="margin-bottom: 10px;">
-            <label for="minCena">Min cena</label>
-            <input type="number" id="minCena" name="MinCena" class="form-control"
-                   placeholder="npr. 30000" min="0" />
-        </div>
+            <div class="filter-group">
+                <h4>Cena (RSD)</h4>
+                <div class="filter-item" style="margin-bottom: 10px;">
+                    <label for="minCena">Min cena</label>
+                    <input type="number" id="minCena" name="MinCena" class="form-control" placeholder="npr. 30000" min="0" />
+                </div>
+                <div class="filter-item">
+                    <label for="maxCena">Max cena</label>
+                    <input type="number" id="maxCena" name="MaxCena" class="form-control" placeholder="npr. 120000" min="0" />
+                </div>
+            </div>
 
-        <div class="filter-item">
-            <label for="maxCena">Max cena</label>
-            <input type="number" id="maxCena" name="MaxCena" class="form-control"
-                   placeholder="npr. 120000" min="0" />
-        </div>
+            <button type="submit" class="btn btn-primary w-100 mt-2">Primeni filtere</button>
+        </form>
+    </aside>
+
+    <div class="results-container" id="productsContainer">
+        @Html.Partial("~/Views/Scrape/ProductsList.cshtml", Model.Products)
     </div>
-    <button type="submit" class="btn btn-primary">Apply</button>
-</form>
-<div class="results-container" id="productsContainer">
-    @Html.Partial("~/Views/Scrape/ProductsList.cshtml", Model.Products)
 </div>
 
 <style>
@@ -99,70 +100,9 @@
         height: fit-content;
     }
 
-    .card-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 20px;
+    .results-container {
+        flex: 1;
     }
-
-    .product-card {
-        background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-        .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .product-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-        }
-
-    .product-info {
-        padding: 12px 15px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        flex-grow: 1;
-    }
-
-        .product-info h5 {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .product-info .price {
-            font-size: 15px;
-            font-weight: bold;
-            color: #0078d4;
-            margin: 0;
-        }
-
-    .btn-outline-primary {
-        border: 1px solid #0078d4;
-        background: transparent;
-        color: #0078d4;
-        font-size: 14px;
-        border-radius: 5px;
-        padding: 6px 10px;
-        align-self: flex-start;
-        transition: all 0.2s ease;
-    }
-
-        .btn-outline-primary:hover {
-            background: #0078d4;
-            color: #fff;
-        }
 
     .filter-group {
         margin-bottom: 20px;
@@ -204,24 +144,19 @@
 
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script>
-    $(document).ready(function () {
-        $('#filterForm').on('submit', function (e) {
-            e.preventDefault(); 
-
-            var form = $(this);
-            var data = form.serialize();
-
-            $.ajax({
-                type: "POST",
-                url: '@Url.Action("ScrapeDesktops", "Desktops")',
-                data: data,
-                success: function (result) {
-                    $('#productsContainer').html(result); 
-                },
-                error: function (xhr, status, error) {
-                    console.error("Greška pri učitavanju proizvoda:", error);
-                }
-            });
+    $('#filterForm').on('submit', function (e) {
+        e.preventDefault();
+        var data = $(this).serialize();
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("ScrapeDesktops", "Desktops")',
+            data: data,
+            success: function (result) {
+                $('#productsContainer').html(result);
+            },
+            error: function (xhr, status, error) {
+                console.error("Greška pri učitavanju proizvoda:", error);
+            }
         });
     });
 </script>
