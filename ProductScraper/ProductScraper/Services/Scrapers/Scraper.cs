@@ -4,8 +4,6 @@ using OpenQA.Selenium.Support.UI;
 using ProductScraper.Data;
 using ProductScraper.Helpers;
 using ProductScraper.Models.Filters;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Web;
 using Mapster;
@@ -17,21 +15,21 @@ using ProductEntity = Data.Product;
 
 public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
 {
-    public async Task<ScrapedResult> Scrape(string category, BaseProductFilters filters)
+    public async Task<ScrapedResult> ScrapeProducts(string category, BaseProductFilters filters)
     {
         var filterValuePairs = GetSelectedFilters(filters);
+        var serializedFilters = JsonSerializer.Serialize(filters, filters.GetType());
 
-        var filterHashValue = GetHashValueFromFitlers(filters);
 
-        if (!IsAlreadyScraped(filterHashValue))
+        if (!IsAlreadyScraped(serializedFilters))
         {
             var products = new List<Product>();
-            var nextUrls = new List<string>();
+            var nextUrls = new List<SitenameAndNexturlPair>();
 
             foreach (var siteName in Constants.SiteNames)
             {
                 var urlQueryParams = BuildUrlQueryParams(siteName + category, filterValuePairs);
-                var elementsForScraping = Constants.GetElementsForScraping(siteName + category);
+                var elementsForScraping = ScrapingElements.GetElementsForScraping(siteName + category);
                 var url = string.Empty;
                 if (siteName == Constants.Ananas.Name)
                     url = BuildAnanasScrapingUrl(elementsForScraping, urlQueryParams);
@@ -44,34 +42,73 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
 
                 var scrapedProducts = ScrapeProducts(url, chromeDriver, elementsForScraping.ScrapingSelectors);
 
-                var nextPageValue = ScrapeNextPage(url, chromeDriver, elementsForScraping.ScrapingSelectors);
+                var nextPageValue = ScrapeNextPageValue(url, chromeDriver, elementsForScraping.ScrapingSelectors);
 
                 if (!string.IsNullOrEmpty(nextPageValue))
                 {
                     var nextUrl = BuildNextUrl(url, nextPageValue, siteName);
-                    nextUrls.Add(nextUrl);
+                    nextUrls.Add(new SitenameAndNexturlPair(siteName, nextUrl));
                 }
 
-                await SaveProductsAsync(products, filterHashValue);
+                chromeDriver.Quit();
+
+                await SaveProductsAsync(products, serializedFilters);
 
                 products.AddRange(scrapedProducts);
             }
-            return new ScrapedResult(products, nextUrls);
+            return new ScrapedResult(products, nextUrls, serializedFilters);
         }
 
-        return null;
+        var alreadyScrapedProducts = GetAlreadyScrapedProducts(serializedFilters);
+        return new ScrapedResult(alreadyScrapedProducts, new List<SitenameAndNexturlPair>(), serializedFilters);
+    }
 
+    public async Task<ScrapedResult> ScrapeProducts(ScrapedResult scrapedResult)
+    {
+        var products = new List<Product>();
+        var nextUrls = new List<SitenameAndNexturlPair>();
+
+        foreach (var sitenameUrlPair in scrapedResult.SitenameAndNexturlPairs)
+        {
+            var scrapingSelectors = ScrapingSelectors.GetScrapingSelectors(sitenameUrlPair.SiteName);
+            var chromeDriver = GetChromeDriver(sitenameUrlPair.NextUrl);
+
+            var scrapedProducts = ScrapeProducts(sitenameUrlPair.NextUrl, chromeDriver, scrapingSelectors);
+
+            var nextPageValue = ScrapeNextPageValue(sitenameUrlPair.NextUrl, chromeDriver, scrapingSelectors);
+
+            if (!string.IsNullOrEmpty(nextPageValue))
+            {
+                var nextUrl = BuildNextUrl(sitenameUrlPair.NextUrl, nextPageValue, sitenameUrlPair.SiteName);
+                nextUrls.Add(new SitenameAndNexturlPair(sitenameUrlPair.SiteName, nextUrl));
+            }
+            chromeDriver.Quit();
+
+            await SaveProductsAsync(products, scrapedResult.AppliedFiltersSerialized);
+
+            products.AddRange(scrapedProducts);
+        }
+
+        return new ScrapedResult(products, nextUrls, scrapedResult.AppliedFiltersSerialized);
     }
 
     private static string BuildNextUrl(string url, string nextPageValue, string siteName)
     {
-        // skini ako je na drugu stranicu page ? 
-        var nextPageQueryParameter = Constants.GetNextPageQueryParameter(siteName);
+        var nextPageQueryParameter = ScrapingElements.GetNextPageQueryParameter(siteName);
+
+        if (url[url.Length - 1] == '?')
+            url.Remove(url.Length - 1);
+
+        if (url.Contains(nextPageQueryParameter))
+        {
+            var index = url.IndexOf(nextPageQueryParameter);
+            url = url.Remove(index);
+        }
 
         return url + "&" + nextPageQueryParameter + "=" + nextPageValue;
     }
 
-    private static string? ScrapeNextPage(string url, ChromeDriver chromeDriver, ScrapingSelectors scrapingSelectors)
+    private static string? ScrapeNextPageValue(string url, ChromeDriver chromeDriver, ScrapingSelectors scrapingSelectors)
     {
         var a = chromeDriver.FindElements(By.CssSelector(scrapingSelectors.PaginationClass))?.Select(x => x.Text).FirstOrDefault();
 
@@ -139,11 +176,6 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
         return productLists;
     }
 
-    private static bool PaginationExist(ChromeDriver driver, ScrapingSelectors scrapingSelectors)
-    {
-        return driver.FindElements(By.CssSelector(scrapingSelectors.PaginationClass)).Any();
-    }
-
     private static bool ProductsExist(ChromeDriver driver, ScrapingSelectors scrapingSelectors, string url)
     {
         return !driver.FindElements(By.CssSelector(scrapingSelectors.ProductsNotFoundClass)).Any() && driver.Url.ToLower() == url.ToLower();
@@ -159,18 +191,6 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
         var productEntities = scrapingDbContext.Products.Where(x => x.FilterHash == hashValue).ToList();
 
         return productEntities.Adapt<List<Product>>();
-    }
-
-    private static string GetHashValueFromFitlers(BaseProductFilters filters)
-    {
-        using (var md5 = MD5.Create())
-        {
-            var serializedFilters = JsonSerializer.Serialize(filters);
-
-            var hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(serializedFilters));
-
-            return BitConverter.ToString(hashBytes).Replace("-", "");
-        }
     }
 
     private static Dictionary<string, List<string>> GetSelectedFilters(BaseProductFilters filters)
@@ -250,7 +270,7 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
                 var vls = queryParam.Value;
                 foreach (var value in vls)
                 {
-                    var encodedKey = HttpUtility.UrlEncode($"{Constants.Ananas.Phones.Brend}[{i}]");
+                    var encodedKey = HttpUtility.UrlEncode($"{"brand"}[{i}]");
                     var encodedValue = HttpUtility.UrlEncode(value);
                     urlParams.Add($"{encodedKey}={encodedValue}");
                     i++;
@@ -280,8 +300,9 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
                 }
             }
         }
+        var url = elementsForScraping.Url + string.Join("&", urlParams);
 
-        return elementsForScraping.Url + string.Join("&", urlParams);
+        return url.Replace("+", "%20");
     }
 
     private static string BuildEPlanetaScrapingUrl(ScrapingElements elementsForScraping, Dictionary<string, List<string>> urlQueryParams)

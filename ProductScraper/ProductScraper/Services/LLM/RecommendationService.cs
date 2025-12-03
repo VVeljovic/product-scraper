@@ -11,7 +11,7 @@ namespace ProductScraper.Services.LLM
         {
             var modelName = "gpt-4o";
 
-            var client = new ChatClient();
+            var client = new ChatClient(modelName, "");
 
             var serializedProducts = JsonSerializer.Serialize(products);
 

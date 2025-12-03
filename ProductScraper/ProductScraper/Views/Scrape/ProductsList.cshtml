@@ -15,9 +15,11 @@
                     </div>
                 </div>
             }
-            @if (Model.NextUrls.Any())
+            @if (Model.SitenameAndNexturlPairs.Any())
             {
-                <p>Postoji jos stranica za skrejping...</p>
+                <button id="scrapeMoreBtn" class="btn btn-primary" style="width:200px; margin-bottom:15px;">
+                    Skrejpuj još.
+                </button>
             }
         }
     </div>
@@ -27,6 +29,48 @@
     </button>
     <div id="recommendationResult" style="margin-top:15px;"></div>
 </main>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const btn = document.getElementById("scrapeMoreBtn");
+
+        if (btn) {
+            btn.addEventListener("click", async function () {
+
+                const bodyModel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+
+                try {
+                    const response = await fetch('/Scrape/scrape-products', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(bodyModel)
+                    });
+
+                    if (!response.ok) {
+                        console.error("Error");
+                        return;
+                    }
+
+                    const html = await response.text();
+
+                    const container = document.getElementById("productsContainer");
+                    const tempDiv = document.createElement("div");
+                    tempDiv.innerHTML = html;
+
+                    while (tempDiv.firstChild) {
+                        container.appendChild(tempDiv.firstChild);
+                    }
+
+                }
+                catch (error) {
+                    console.error("Greška:", error);
+                }
+            });
+        }
+    });
+</script>
 <script>
     document.getElementById("generateBtn").addEventListener("click", function () {
 

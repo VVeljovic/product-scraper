@@ -16,7 +16,7 @@ namespace ProductScraper.Controllers
 
         public async Task<IActionResult> ScrapeTablets(TabletsFilters model)
         {
-            var lista = await scraper.Scrape("Tablets", model);
+            var lista = await scraper.ScrapeProducts("Tablets", model);
 
             return PartialView("~/Views/Scrape/ProductsList.cshtml", lista);
         }
