@@ -1,23 +1,56 @@
-﻿@model List<Product>
+﻿@model ScrapedResult
 <main class="results-content">
     <h3>Rezultati pretrage</h3>
     <div class="card-grid">
         @if (Model != null)
-        @foreach (var product in Model)
         {
-            <div class="product-card">
-                <img src="https://dummyimage.com/300x200/0078d4/ffffff&text=ASUS+Vivobook+15" alt="ASUS Vivobook 15" />
-                <div class="product-info">
-                    <h5>@product.Title</h5>
-                    <p class="price">@product.Price</p>
-                    <a href="@product.SourceLink" class="btn btn-outline-primary">Detalji</a>
+            @foreach (var product in Model.Products)
+            {
+                <div class="product-card">
+                    <img src='@($"https://dummyimage.com/300x200/0078d4/ffffff&text={Uri.EscapeDataString(product.Title.Split(' ')[0])}")' alt="" />
+                    <div class="product-info">
+                        <h5>@product.Title</h5>
+                        <p class="price">@product.Price</p>
+                        <a href="@product.SourceLink" class="btn btn-outline-primary">Detalji</a>
+                    </div>
                 </div>
-            </div>
+            }
+            @if (Model.NextUrls.Any())
+            {
+                <p>Postoji jos stranica za skrejping...</p>
+            }
         }
-
     </div>
-</main>
 
+    <button id="generateBtn" class="btn btn-primary" style="width:200px; margin-bottom:15px;">
+        Generiši preporuku
+    </button>
+    <div id="recommendationResult" style="margin-top:15px;"></div>
+</main>
+<script>
+    document.getElementById("generateBtn").addEventListener("click", function () {
+
+        const products = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+
+        fetch('/Laptops/GenerateRecommendation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(products)
+        })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById("recommendationResult").innerHTML =
+                `<div class="alert alert-success">Preporuka generisana: <b>${data.recommendation}</b></div>`;
+        })
+        .catch(err => {
+            document.getElementById("recommendationResult").innerHTML =
+                `<div class="alert alert-danger">Greška: ${err}</div>`;
+        });
+
+    });
+</script>
 <style>
     .page-layout {
         display: flex;

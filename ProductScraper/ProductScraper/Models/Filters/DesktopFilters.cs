@@ -7,6 +7,4 @@ public class DesktopFilters : BaseProductFilters
     public List<string> TipProcesora { get; set; }
 
     public List<string> SSD { get; set; }
-
-    public List<string> GrafickaKartica { get; set; }
 }

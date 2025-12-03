@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProductScraper.Models.Filters;
-using ProductScraper.Scrapers;
+using ProductScraper.Services.Scrapers;
 using ProductScraper.Views.Models;
 
 namespace ProductScraper.Controllers
@@ -14,11 +14,11 @@ namespace ProductScraper.Controllers
             return PartialView("~/Views/Scrape/DesktopsFilters.cshtml", new DesktopViewModel { Filters = desktopFilters });
         }
 
-        public ActionResult ScrapeDesktops(DesktopFilters model)
+        public async Task<IActionResult> ScrapeDesktops(DesktopFilters model)
         {
-            var lista = scraper.Scrape("Desktops", model);
+            var lista = await scraper.Scrape("Desktops", model);
 
-            return PartialView("~/Views/Scrape/ProductsList.cshtml", lista);
+            return PartialView($"~/Views/Scrape/ProductsList.cshtml", lista);
         }
     }
 }

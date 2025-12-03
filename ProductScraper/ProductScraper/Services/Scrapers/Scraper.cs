@@ -9,14 +9,15 @@ using System.Text;
 using System.Text.Json;
 using System.Web;
 using Mapster;
+using ProductScraper.Models;
 
-namespace ProductScraper.Scrapers;
+namespace ProductScraper.Services.Scrapers;
 using Product = Models.Product;
 using ProductEntity = Data.Product;
 
 public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
 {
-    public async Task<List<Product>> Scrape(string category, BaseProductFilters filters)
+    public async Task<ScrapedResult> Scrape(string category, BaseProductFilters filters)
     {
         var filterValuePairs = GetSelectedFilters(filters);
 
@@ -25,6 +26,8 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
         if (!IsAlreadyScraped(filterHashValue))
         {
             var products = new List<Product>();
+            var nextUrls = new List<string>();
+
             foreach (var siteName in Constants.SiteNames)
             {
                 var urlQueryParams = BuildUrlQueryParams(siteName + category, filterValuePairs);
@@ -35,19 +38,51 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
                 else if (siteName == Constants.Gigatron.Name)
                     url = BuildGigatronScrapingUrl(elementsForScraping, urlQueryParams);
                 else
-                    url = BuildJakovSistemScrapingUrl(elementsForScraping, urlQueryParams);
+                    url = BuildEPlanetaScrapingUrl(elementsForScraping, urlQueryParams);
 
-                var scrapedProducts = ScrapeProducts(url, elementsForScraping.ScrapingSelectors);
+                var chromeDriver = GetChromeDriver(url);
+
+                var scrapedProducts = ScrapeProducts(url, chromeDriver, elementsForScraping.ScrapingSelectors);
+
+                var nextPageValue = ScrapeNextPage(url, chromeDriver, elementsForScraping.ScrapingSelectors);
+
+                if (!string.IsNullOrEmpty(nextPageValue))
+                {
+                    var nextUrl = BuildNextUrl(url, nextPageValue, siteName);
+                    nextUrls.Add(nextUrl);
+                }
 
                 await SaveProductsAsync(products, filterHashValue);
 
                 products.AddRange(scrapedProducts);
             }
-            return products;
+            return new ScrapedResult(products, nextUrls);
         }
 
-        return GetAlreadyScrapedProducts(filterHashValue);
+        return null;
 
+    }
+
+    private static string BuildNextUrl(string url, string nextPageValue, string siteName)
+    {
+        // skini ako je na drugu stranicu page ? 
+        var nextPageQueryParameter = Constants.GetNextPageQueryParameter(siteName);
+
+        return url + "&" + nextPageQueryParameter + "=" + nextPageValue;
+    }
+
+    private static string? ScrapeNextPage(string url, ChromeDriver chromeDriver, ScrapingSelectors scrapingSelectors)
+    {
+        var a = chromeDriver.FindElements(By.CssSelector(scrapingSelectors.PaginationClass))?.Select(x => x.Text).FirstOrDefault();
+
+        if (Int32.TryParse(a, out var br))
+        {
+            br++;
+
+            return br.ToString();
+        }
+
+        return string.Empty;
     }
 
     private async Task SaveProductsAsync(List<Product> products, string filterHashValue)
@@ -60,7 +95,7 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
         await scrapingDbContext.SaveChangesAsync();
     }
 
-    private static List<Product> ScrapeProducts(string finalUrl, ScrapingSelectors scrapingSelectors)
+    private static ChromeDriver GetChromeDriver(string finalUrl)
     {
         Console.WriteLine(finalUrl);
 
@@ -70,18 +105,18 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
         var driver = new ChromeDriver(chromeOptions);
 
         driver.Navigate().GoToUrl(finalUrl);
-        var products = ExtractProductsDetails(driver, scrapingSelectors);
-        driver.Quit();
-        return products;
+
+        return driver;
     }
 
-    private static List<Product> ExtractProductsDetails(ChromeDriver driver, ScrapingSelectors scrapingSelectors)
+    private static List<Product> ScrapeProducts(string url, ChromeDriver driver, ScrapingSelectors scrapingSelectors)
     {
         var pageSource = driver.PageSource;
-        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(30));
         var productLists = new List<Product>();
 
-        if (!ProductsExist(driver, scrapingSelectors))
+        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+
+        if (!ProductsExist(driver, scrapingSelectors, url))
             return productLists;
 
         wait.Until(d => d.FindElements(By.CssSelector(scrapingSelectors.LinkClass)).Count > 0);
@@ -98,15 +133,20 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
                 continue;
             var link = linkElement.GetAttribute("href");
 
-            productLists.Add(new Product(title, price, link));
+            productLists.Add(new Product(title, price, link, null));
         }
 
         return productLists;
     }
 
-    private static bool ProductsExist(ChromeDriver driver, ScrapingSelectors scrapingSelectors)
+    private static bool PaginationExist(ChromeDriver driver, ScrapingSelectors scrapingSelectors)
     {
-        return !driver.FindElements(By.CssSelector(scrapingSelectors.ProductsNotFoundClass)).Any();
+        return driver.FindElements(By.CssSelector(scrapingSelectors.PaginationClass)).Any();
+    }
+
+    private static bool ProductsExist(ChromeDriver driver, ScrapingSelectors scrapingSelectors, string url)
+    {
+        return !driver.FindElements(By.CssSelector(scrapingSelectors.ProductsNotFoundClass)).Any() && driver.Url.ToLower() == url.ToLower();
     }
 
     private bool IsAlreadyScraped(string hashValue)
@@ -186,7 +226,7 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
                     if (!string.IsNullOrEmpty(mappedValue))
                         mappedValues.Add(mappedValue);
 
-                    if(Decimal.TryParse(masterValue, out var number))
+                    if (decimal.TryParse(masterValue, out var number))
                     {
                         mappedValues.Add(masterValue);
                     }
@@ -215,6 +255,7 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
                     urlParams.Add($"{encodedKey}={encodedValue}");
                     i++;
                 }
+                continue;
             }
 
             if (queryParam.Key == "price")
@@ -224,6 +265,7 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
                 var encodedMaxPrice = HttpUtility.UrlEncode(urlQueryParams["MaxPrice"].First());
                 urlQueryParams.Remove("MaxPrice");
                 urlParams.Add($"{encodedKey}={encodedMinPrice}%3A{encodedMaxPrice}");
+                continue;
             }
 
             else
@@ -237,6 +279,19 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
                     i++;
                 }
             }
+        }
+
+        return elementsForScraping.Url + string.Join("&", urlParams);
+    }
+
+    private static string BuildEPlanetaScrapingUrl(ScrapingElements elementsForScraping, Dictionary<string, List<string>> urlQueryParams)
+    {
+        var urlParams = new List<string>();
+
+        foreach (var queryParam in urlQueryParams)
+        {
+            var joinedValues = string.Join("%25", queryParam.Value);
+            urlParams.Add($"{queryParam.Key}={joinedValues}");
         }
 
         return elementsForScraping.Url + string.Join("&", urlParams);
@@ -265,32 +320,5 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
             }
         }
         return elementsForScraping.Url + string.Join("&", urlParams);
-    }
-
-    private static string BuildJakovSistemScrapingUrl(ScrapingElements elementsForScraping, Dictionary<string, List<string>> urlQueryParams)
-    {
-        var urlParams = new List<string>();
-        var resultUrl = elementsForScraping.Url;
-
-        foreach (var pair in urlQueryParams)
-        {
-            var keyEncoded = HttpUtility.UrlEncode(pair.Key);
-
-            if (pair.Key == "from")
-            {
-                resultUrl += $"price=asc&{pair.Key}={pair.Value.First()}&to={urlQueryParams["to"].First()}";
-                urlQueryParams.Remove("to");
-                continue;
-            }
-
-            var encodedValues = pair.Value
-                .Select(v => HttpUtility.UrlEncode(v));
-
-            var joined = string.Join("§", encodedValues);
-
-            urlParams.Add($"{keyEncoded}={joined}");
-        }
-
-        return resultUrl + string.Join("&", urlParams);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProductScraper.Models.Filters;
-using ProductScraper.Scrapers;
+using ProductScraper.Services.Scrapers;
 using ProductScraper.Views.Models;
 
 namespace ProductScraper.Controllers

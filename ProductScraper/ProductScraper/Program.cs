@@ -1,12 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using ProductScraper.Data;
-using ProductScraper.Scrapers;
+using ProductScraper.Services.LLM;
+using ProductScraper.Services.Scrapers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IScrape, Scraper>();
+builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 
 builder.Services.AddDbContext<ScrapingDbContext>(opt =>
 {
