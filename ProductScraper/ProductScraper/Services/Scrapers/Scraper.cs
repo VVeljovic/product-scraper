@@ -5,92 +5,86 @@ using ProductScraper.Data;
 using ProductScraper.Helpers;
 using ProductScraper.Models.Filters;
 using System.Text.Json;
-using System.Web;
 using Mapster;
 using ProductScraper.Models;
+using ProductScraper.Services.UrlBuilders.Factory;
 
 namespace ProductScraper.Services.Scrapers;
 using Product = Models.Product;
 using ProductEntity = Data.Product;
 
-public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
+public class Scraper(IUrlBuilderFactory factory, ScrapingDbContext scrapingDbContext) : IScrape
 {
-    public async Task<ScrapedResult> ScrapeProducts(string category, BaseProductFilters filters)
+    public async Task<ScrapedResult> ScrapeProducts(QueryScrapingModel queryScrapingModel)
     {
-        var filterValuePairs = GetSelectedFilters(filters);
-        var serializedFilters = JsonSerializer.Serialize(filters, filters.GetType());
-
-
-        if (!IsAlreadyScraped(serializedFilters))
+        var siteUrlPairs = new List<SiteAndUrlPair>();
+        foreach (var siteName in Constants.SiteNames)
         {
-            var products = new List<Product>();
-            var nextUrls = new List<SitenameAndNexturlPair>();
-
-            foreach (var siteName in Constants.SiteNames)
-            {
-                var urlQueryParams = BuildUrlQueryParams(siteName + category, filterValuePairs);
-                var elementsForScraping = ScrapingElements.GetElementsForScraping(siteName + category);
-                var url = string.Empty;
-                if (siteName == Constants.Ananas.Name)
-                    url = BuildAnanasScrapingUrl(elementsForScraping, urlQueryParams);
-                else if (siteName == Constants.Gigatron.Name)
-                    url = BuildGigatronScrapingUrl(elementsForScraping, urlQueryParams);
-                else
-                    url = BuildEPlanetaScrapingUrl(elementsForScraping, urlQueryParams);
-
-                var chromeDriver = GetChromeDriver(url);
-
-                var scrapedProducts = ScrapeProducts(url, chromeDriver, elementsForScraping.ScrapingSelectors);
-
-                var nextPageValue = ScrapeNextPageValue(url, chromeDriver, elementsForScraping.ScrapingSelectors);
-
-                if (!string.IsNullOrEmpty(nextPageValue))
-                {
-                    var nextUrl = BuildNextUrl(url, nextPageValue, siteName);
-                    nextUrls.Add(new SitenameAndNexturlPair(siteName, nextUrl));
-                }
-
-                chromeDriver.Quit();
-
-                await SaveProductsAsync(products, serializedFilters);
-
-                products.AddRange(scrapedProducts);
-            }
-            return new ScrapedResult(products, nextUrls, serializedFilters);
+            var url = factory.GetStrategy(siteName).BuildUrl(queryScrapingModel);
+            siteUrlPairs.Add(new SiteAndUrlPair(siteName, url));
         }
-
-        var alreadyScrapedProducts = GetAlreadyScrapedProducts(serializedFilters);
-        return new ScrapedResult(alreadyScrapedProducts, new List<SitenameAndNexturlPair>(), serializedFilters);
+        return await ScrapeWorkflow(siteUrlPairs, JsonSerializer.Serialize(queryScrapingModel));
     }
+
 
     public async Task<ScrapedResult> ScrapeProducts(ScrapedResult scrapedResult)
     {
-        var products = new List<Product>();
-        var nextUrls = new List<SitenameAndNexturlPair>();
+        return await ScrapeWorkflow(scrapedResult.SitenameAndNexturlPairs, scrapedResult.AppliedFiltersSerialized);
+    }
 
-        foreach (var sitenameUrlPair in scrapedResult.SitenameAndNexturlPairs)
+    public async Task<ScrapedResult> ScrapeProducts(string category, BaseProductFilters filters)
+    {
+        var serializedFilters = JsonSerializer.Serialize(filters);
+
+        if (IsAlreadyScraped(serializedFilters))
         {
-            var scrapingSelectors = ScrapingSelectors.GetScrapingSelectors(sitenameUrlPair.SiteName);
-            var chromeDriver = GetChromeDriver(sitenameUrlPair.NextUrl);
-
-            var scrapedProducts = ScrapeProducts(sitenameUrlPair.NextUrl, chromeDriver, scrapingSelectors);
-
-            var nextPageValue = ScrapeNextPageValue(sitenameUrlPair.NextUrl, chromeDriver, scrapingSelectors);
-
-            if (!string.IsNullOrEmpty(nextPageValue))
-            {
-                var nextUrl = BuildNextUrl(sitenameUrlPair.NextUrl, nextPageValue, sitenameUrlPair.SiteName);
-                nextUrls.Add(new SitenameAndNexturlPair(sitenameUrlPair.SiteName, nextUrl));
-            }
-            chromeDriver.Quit();
-
-            await SaveProductsAsync(products, scrapedResult.AppliedFiltersSerialized);
-
-            products.AddRange(scrapedProducts);
+            var already = GetAlreadyScrapedProducts(serializedFilters);
+            return new ScrapedResult(already, new List<SiteAndUrlPair>(), serializedFilters);
         }
 
-        return new ScrapedResult(products, nextUrls, scrapedResult.AppliedFiltersSerialized);
+        var masterFilterValuePairs = GetSelectedFilters(filters);
+
+        var siteUrlPairs = new List<SiteAndUrlPair>();
+
+        foreach (var siteName in filters.SiteNames)
+        {
+            var scrapingElements = ScrapingElements.GetElementsForScraping(siteName + category);
+            var urlQueryParams = GetStoreFilterValuesPairs(siteName + category, masterFilterValuePairs);
+            var url = factory.GetStrategy(siteName).BuildUrl(scrapingElements, urlQueryParams);
+
+            siteUrlPairs.Add(new SiteAndUrlPair(siteName, url));
+        }
+
+        return await ScrapeWorkflow(siteUrlPairs, serializedFilters);
     }
+
+    private async Task<ScrapedResult> ScrapeWorkflow(IEnumerable<SiteAndUrlPair> siteUrlPairs, string filterHash)
+    {
+        var products = new List<Product>();
+        var nextUrls = new List<SiteAndUrlPair>();
+
+        foreach (var pair in siteUrlPairs)
+        {
+            var selectors = ScrapingSelectors.GetScrapingSelectors(pair.SiteName);
+
+            using var driver = GetChromeDriver(pair.Url);
+
+            var scraped = ScrapeProducts(pair.Url, driver, selectors);
+
+            var nextPage = ScrapeNextPageValue(pair.Url, driver, selectors);
+            if (!string.IsNullOrEmpty(nextPage))
+            {
+                var nextUrl = BuildNextUrl(pair.Url, nextPage, pair.SiteName);
+                nextUrls.Add(new SiteAndUrlPair(pair.SiteName, nextUrl));
+            }
+
+            products.AddRange(scraped);
+            await SaveProductsAsync(scraped, filterHash);
+        }
+
+        return new ScrapedResult(products, nextUrls, filterHash);
+    }
+
 
     private static string BuildNextUrl(string url, string nextPageValue, string siteName)
     {
@@ -99,25 +93,26 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
         if (url[url.Length - 1] == '?')
             url.Remove(url.Length - 1);
 
-        if (url.Contains(nextPageQueryParameter))
+        if (url.Contains("&" + nextPageQueryParameter))
         {
-            var index = url.IndexOf(nextPageQueryParameter);
+            var index = url.LastIndexOf("&" + nextPageQueryParameter);
             url = url.Remove(index);
         }
+
 
         return url + "&" + nextPageQueryParameter + "=" + nextPageValue;
     }
 
     private static string? ScrapeNextPageValue(string url, ChromeDriver chromeDriver, ScrapingSelectors scrapingSelectors)
     {
-        var a = chromeDriver.FindElements(By.CssSelector(scrapingSelectors.PaginationClass))?.Select(x => x.Text).FirstOrDefault();
+        var currentPageElement = chromeDriver
+            .FindElements(By.CssSelector(scrapingSelectors.CurrentPage))
+            .FirstOrDefault();
 
-        if (Int32.TryParse(a, out var br))
-        {
-            br++;
+        var nextElement = currentPageElement?.FindElements(By.XPath("following-sibling::*[1]")).FirstOrDefault();
 
-            return br.ToString();
-        }
+        if (int.TryParse(nextElement?.Text, out int pageNumber))
+            return (pageNumber).ToString();
 
         return string.Empty;
     }
@@ -146,34 +141,22 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
         return driver;
     }
 
-    private static List<Product> ScrapeProducts(string url, ChromeDriver driver, ScrapingSelectors scrapingSelectors)
+    private static List<Product> ScrapeProducts(string url, ChromeDriver driver, ScrapingSelectors s)
     {
-        var pageSource = driver.PageSource;
-        var productLists = new List<Product>();
+        if (!ProductsExist(driver, s, url))
+            return new List<Product>();
 
-        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+        new WebDriverWait(driver, TimeSpan.FromSeconds(10))
+            .Until(d => d.FindElements(By.CssSelector(s.LinkClass)).Count > 0);
 
-        if (!ProductsExist(driver, scrapingSelectors, url))
-            return productLists;
-
-        wait.Until(d => d.FindElements(By.CssSelector(scrapingSelectors.LinkClass)).Count > 0);
-        var divElements = driver.FindElements(By.CssSelector(scrapingSelectors.DivClass));
-
-        foreach (var divElement in divElements)
-        {
-            var title = divElement.FindElement(By.CssSelector(scrapingSelectors.TitleClass)).Text.Trim();
-
-            var price = divElement.FindElement(By.CssSelector(scrapingSelectors.PriceClass)).Text.Trim();
-
-            var linkElement = divElement.FindElement(By.CssSelector(scrapingSelectors.LinkClass));
-            if (linkElement == null)
-                continue;
-            var link = linkElement.GetAttribute("href");
-
-            productLists.Add(new Product(title, price, link, null));
-        }
-
-        return productLists;
+        return driver.FindElements(By.CssSelector(s.DivClass))
+            .Select(div => new Product(
+                div.FindElement(By.CssSelector(s.TitleClass))?.Text.Trim() ?? string.Empty,
+                div.FindElements(By.CssSelector(s.PriceClass)).FirstOrDefault()?.Text.Trim() ?? string.Empty,
+                div.FindElement(By.CssSelector(s.LinkClass)).GetAttribute("href") ?? string.Empty,
+                null
+            ))
+            .ToList();
     }
 
     private static bool ProductsExist(ChromeDriver driver, ScrapingSelectors scrapingSelectors, string url)
@@ -195,36 +178,37 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
 
     private static Dictionary<string, List<string>> GetSelectedFilters(BaseProductFilters filters)
     {
-        var type = filters.GetType();
+        var properties = filters.GetType()
+            .GetProperties()
+            .Where(p => p.Name != nameof(BaseProductFilters.SiteNames));
 
-        var props = type.GetProperties();
-        var filterValuePairs = new Dictionary<string, List<string>>();
-        foreach (var prop in props)
+        var filterValuesPairs = new Dictionary<string, List<string>>();
+
+        foreach (var prop in properties)
         {
             var value = prop.GetValue(filters);
-
             if (value is null)
                 continue;
 
-            else if (value is List<string> list)
+            if (value is List<string> list)
             {
-                filterValuePairs.Add(prop.Name, list);
+                if (list.Count > 0)
+                    filterValuesPairs[prop.Name] = list;
+                continue;
             }
 
-            else if ((decimal)value == 0)
+            if (value is decimal dec && dec == 0)
                 continue;
 
-            else
-            {
-                var stringValue = Convert.ToString(value);
-                filterValuePairs.Add(prop.Name, new List<string> { stringValue });
-            }
+            var stringValue = Convert.ToString(value);
+            if (!string.IsNullOrWhiteSpace(stringValue))
+                filterValuesPairs[prop.Name] = new List<string> { stringValue };
         }
 
-        return filterValuePairs;
+        return filterValuesPairs;
     }
 
-    private Dictionary<string, List<string>> BuildUrlQueryParams(string siteNameCategoryName, Dictionary<string, List<string>> masterFilterValuePairs)
+    private Dictionary<string, List<string>> GetStoreFilterValuesPairs(string siteNameCategoryName, Dictionary<string, List<string>> masterFilterValuePairs)
     {
         var urlQueryParams = new Dictionary<string, List<string>>();
 
@@ -256,90 +240,5 @@ public class Scraper(ScrapingDbContext scrapingDbContext) : IScrape
         }
 
         return urlQueryParams;
-    }
-
-    private static string BuildAnanasScrapingUrl(ScrapingElements elementsForScraping, Dictionary<string, List<string>> urlQueryParams)
-    {
-        var urlParams = new List<string>();
-
-        foreach (var queryParam in urlQueryParams)
-        {
-            if (queryParam.Key == "brand")
-            {
-                var i = 0;
-                var vls = queryParam.Value;
-                foreach (var value in vls)
-                {
-                    var encodedKey = HttpUtility.UrlEncode($"{"brand"}[{i}]");
-                    var encodedValue = HttpUtility.UrlEncode(value);
-                    urlParams.Add($"{encodedKey}={encodedValue}");
-                    i++;
-                }
-                continue;
-            }
-
-            if (queryParam.Key == "price")
-            {
-                var encodedKey = HttpUtility.UrlEncode(queryParam.Key);
-                var encodedMinPrice = HttpUtility.UrlEncode(queryParam.Value.First());
-                var encodedMaxPrice = HttpUtility.UrlEncode(urlQueryParams["MaxPrice"].First());
-                urlQueryParams.Remove("MaxPrice");
-                urlParams.Add($"{encodedKey}={encodedMinPrice}%3A{encodedMaxPrice}");
-                continue;
-            }
-
-            else
-            {
-                var i = 0;
-                foreach (var el in queryParam.Value)
-                {
-                    var encodedKey = HttpUtility.UrlEncode($"{elementsForScraping.QueryAttribut}{queryParam.Key}][{i}]");
-                    var encodedValue = HttpUtility.UrlEncode(el);
-                    urlParams.Add($"{encodedKey}={encodedValue}");
-                    i++;
-                }
-            }
-        }
-        var url = elementsForScraping.Url + string.Join("&", urlParams);
-
-        return url.Replace("+", "%20");
-    }
-
-    private static string BuildEPlanetaScrapingUrl(ScrapingElements elementsForScraping, Dictionary<string, List<string>> urlQueryParams)
-    {
-        var urlParams = new List<string>();
-
-        foreach (var queryParam in urlQueryParams)
-        {
-            var joinedValues = string.Join("%25", queryParam.Value);
-            urlParams.Add($"{queryParam.Key}={joinedValues}");
-        }
-
-        return elementsForScraping.Url + string.Join("&", urlParams);
-    }
-
-    private static string BuildGigatronScrapingUrl(ScrapingElements elementsForScraping, Dictionary<string, List<string>> urlQueryParams)
-    {
-        var urlParams = new List<string>();
-
-        foreach (var param in urlQueryParams)
-        {
-            var keyEncoded = Uri.EscapeDataString(Uri.EscapeDataString(param.Key));
-            if (param.Key == "cena")
-            {
-                var minCena = Uri.EscapeDataString(Uri.EscapeDataString(param.Value.First()));
-                var maxCena = Uri.EscapeDataString(Uri.EscapeDataString(urlQueryParams["MaxCena"].First()));
-                urlParams.Add($"{keyEncoded}={minCena}..{maxCena}");
-                urlQueryParams.Remove("MaxCena");
-                continue;
-            }
-
-            foreach (var value in param.Value)
-            {
-                var valueEncoded = Uri.EscapeDataString(Uri.EscapeDataString(value));
-                urlParams.Add($"{keyEncoded}={valueEncoded}");
-            }
-        }
-        return elementsForScraping.Url + string.Join("&", urlParams);
     }
 }

@@ -16,11 +16,12 @@ namespace ProductScraper.Controllers
             return PartialView("~/Views/Scrape/LaptopsFilters.cshtml", new LaptopViewModel { Filters = laptopFilters });
         }
 
+        [HttpPost]
         public async Task<IActionResult> ScrapeLaptops(LaptopFilters model)
         {
-            var lista = await scraper.ScrapeProducts("Laptops", model);
+            var scrapedResult = await scraper.ScrapeProducts("Laptops", model);
 
-            return PartialView("~/Views/Scrape/ProductsList.cshtml", lista);
+            return PartialView("~/Views/Scrape/ScrapeResults.cshtml", scrapedResult);
         }
 
         [HttpPost]

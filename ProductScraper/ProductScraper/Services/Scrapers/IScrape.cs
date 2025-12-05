@@ -8,4 +8,6 @@ public interface IScrape
     public Task<ScrapedResult> ScrapeProducts(string category, BaseProductFilters selectedFilters);
 
     public Task<ScrapedResult> ScrapeProducts(ScrapedResult scrapedResult);
+
+    public Task<ScrapedResult> ScrapeProducts(QueryScrapingModel queryScrapingModel);
 }

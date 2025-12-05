@@ -1,0 +1,134 @@
+﻿@model ScrapedResult
+
+<main class="results-content">
+    <h3>Rezultati pretrage</h3>
+
+    <div class="card-grid" id="productsContainer">
+        @if (Model != null && Model.Products.Any())
+        {
+            @await Html.PartialAsync("~/Views/Scrape/ProductsList.cshtml", Model)
+        }
+    </div>
+
+    <button id="generateBtnn" class="btn btn-primary" style="width:200px; margin-top:15px;">
+        Generiši preporuku
+    </button>
+
+    <div id="recommendationResult" style="margin-top:15px;"></div>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $("#generateBtnn").click(async function () {
+            const products = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Products));
+            console.log(products);
+
+            try {
+                const response = await fetch('/Laptops/GenerateRecommendation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(products)
+                });
+
+                const data = await response.json();
+                $("#recommendationResult").html(
+                    `<div class="alert alert-success">Preporuka generisana: <b>${data.recommendation}</b></div>`
+                );
+
+            } catch (err) {
+                $("#recommendationResult").html(
+                    `<div class="alert alert-danger">Greška: ${err}</div>`
+                );
+            }
+        });
+    });
+</script>
+
+<style>
+    .results-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .results-content h3 {
+            margin-bottom: 15px;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 5px;
+        }
+
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .product-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+    .product-info {
+        padding: 12px 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex-grow: 1;
+    }
+
+        .product-info h5 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .product-info .price {
+            font-size: 15px;
+            font-weight: bold;
+            color: #0078d4;
+            margin: 0;
+        }
+
+    .btn-outline-primary {
+        border: 1px solid #0078d4;
+        background: transparent;
+        color: #0078d4;
+        font-size: 14px;
+        border-radius: 5px;
+        padding: 6px 10px;
+        align-self: flex-start;
+        transition: all 0.2s ease;
+    }
+
+        .btn-outline-primary:hover {
+            background: #0078d4;
+            color: #fff;
+        }
+
+    .btn-primary {
+        background-color: #0078d4;
+        border: none;
+        margin-top: 10px;
+    }
+
+        .btn-primary:hover {
+            background-color: #005fa3;
+        }
+</style>

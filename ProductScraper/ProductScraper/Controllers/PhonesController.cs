@@ -14,11 +14,12 @@ namespace ProductScraper.Controllers
             return PartialView("~/Views/Scrape/PhonesFilters.cshtml", new PhoneViewModel { Filters = phonesFilter });
         }
 
+        [HttpPost]
         public async Task<IActionResult> ScrapePhones(PhonesFilters model)
         {
-            var lista = await scraper.ScrapeProducts("Phones", model);
+            var scrapedResult = await scraper.ScrapeProducts("Phones", model);
 
-            return PartialView("~/Views/Scrape/ProductsList.cshtml", lista);
+            return PartialView("~/Views/Scrape/ScrapeResults.cshtml", scrapedResult);
         }
     }
 }

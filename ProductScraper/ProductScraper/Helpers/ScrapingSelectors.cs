@@ -2,7 +2,7 @@
 
 namespace ProductScraper.Helpers;
 
-public sealed record ScrapingSelectors(string DivClass, string LinkClass, string TitleClass, string PriceClass, string ProductsNotFoundClass, string PaginationClass)
+public sealed record ScrapingSelectors(string DivClass, string LinkClass, string TitleClass, string PriceClass, string ProductsNotFoundClass, string CurrentPage)
 {
     public static ScrapingSelectors GetScrapingSelectors(string url)
     {

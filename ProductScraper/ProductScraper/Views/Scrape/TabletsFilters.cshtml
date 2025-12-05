@@ -86,6 +86,20 @@
                 </div>
             </div>
 
+            @if (Model.Filters.SiteNames != null)
+            {
+                <div class="filter-group">
+                    <h4>Odaberi sajtove</h4>
+                    @foreach (var item in Model.Filters.SiteNames)
+                    {
+                        <div class="filter-item">
+                            <input type="checkbox" id="res_@item" name="SiteNames" value="@item" />
+                            <label for="res_@item">@item</label>
+                        </div>
+                    }
+                </div>
+            }
+
             <button type="submit" class="btn btn-primary w-100 mt-2">Primeni filtere</button>
         </form>
     </aside>

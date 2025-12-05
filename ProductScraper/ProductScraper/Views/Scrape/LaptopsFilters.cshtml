@@ -104,7 +104,19 @@
                            placeholder="npr. 120000" min="0" />
                 </div>
             </div>
-            
+            @if (Model.Filters.SiteNames != null)
+            {
+                <div class="filter-group">
+                    <h4>Odaberi sajtove</h4>
+                    @foreach (var item in Model.Filters.SiteNames)
+                    {
+                        <div class="filter-item">
+                            <input type="checkbox" id="res_@item" name="SiteNames" value="@item" />
+                            <label for="res_@item">@item</label>
+                        </div>
+                    }
+                </div>
+            }
             <button type="submit" class="btn btn-primary w-100 mt-2">Primeni filtere</button>
         </form>
     </aside>
@@ -133,70 +145,9 @@
         height: fit-content;
     }
 
-    .card-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 20px;
+    .results-container {
+        flex: 1;
     }
-
-    .product-card {
-        background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-        .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .product-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-        }
-
-    .product-info {
-        padding: 12px 15px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        flex-grow: 1;
-    }
-
-        .product-info h5 {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .product-info .price {
-            font-size: 15px;
-            font-weight: bold;
-            color: #0078d4;
-            margin: 0;
-        }
-
-    .btn-outline-primary {
-        border: 1px solid #0078d4;
-        background: transparent;
-        color: #0078d4;
-        font-size: 14px;
-        border-radius: 5px;
-        padding: 6px 10px;
-        align-self: flex-start;
-        transition: all 0.2s ease;
-    }
-
-        .btn-outline-primary:hover {
-            background: #0078d4;
-            color: #fff;
-        }
 
     .filter-group {
         margin-bottom: 20px;
@@ -236,11 +187,23 @@
         }
 </style>
 
+
+
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script>
     $('#filterForm').on('submit', function (e) {
         e.preventDefault();
-        var query = $(this).serialize();
-        window.location.href = '/Laptops/ScrapeLaptops?' + query;
+        var data = $(this).serialize();
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("ScrapeLaptops", "Laptops")',
+            data: data,
+            success: function (result) {
+                $('#productsContainer').html(result);
+            },
+            error: function (xhr, status, error) {
+                console.error("Greška pri učitavanju proizvoda:", error);
+            }
+        });
     });
 </script>

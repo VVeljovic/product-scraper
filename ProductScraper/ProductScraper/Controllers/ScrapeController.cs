@@ -15,11 +15,19 @@ namespace ProductScraper.Controllers
         }
 
         [HttpPost("scrape-products")]
-        public async Task<IActionResult> ScrapeProducts([FromBody]ScrapedResult scrapedResult)
+        public async Task<IActionResult> ScrapeProducts(ScrapedResult scrapedResult)
         {
-            var products = await scraper.ScrapeProducts(scrapedResult);
+            var scrapedResults = await scraper.ScrapeProducts(scrapedResult);
 
-            return PartialView($"~/Views/Scrape/ProductsList.cshtml", products);
+            return PartialView($"~/Views/Scrape/ProductsList.cshtml", scrapedResults);
+        }
+
+        [HttpGet("search-scraping")]
+        public async Task<IActionResult> ScrapeProducts(QueryScrapingModel queryScrapingModel)
+        {
+            var scrapedResults = await scraper.ScrapeProducts(queryScrapingModel);
+
+            return PartialView($"~/Views/Scrape/ScrapeResults.cshtml", scrapedResults);
         }
     }
 }

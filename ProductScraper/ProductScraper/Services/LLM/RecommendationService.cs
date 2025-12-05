@@ -5,13 +5,13 @@ using System.Text.Json;
 
 namespace ProductScraper.Services.LLM
 {
-    public class RecommendationService : IRecommendationService
+    public class RecommendationService(IConfiguration configuration) : IRecommendationService
     {
         public async Task<string> GenerateRecommendation(List<Product> products)
         {
             var modelName = "gpt-4o";
 
-            var client = new ChatClient(modelName, "");
+            var client = new ChatClient(modelName, configuration.GetSection("OpenAI").Value);
 
             var serializedProducts = JsonSerializer.Serialize(products);
 

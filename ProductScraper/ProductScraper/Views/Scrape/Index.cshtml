@@ -1,6 +1,14 @@
-﻿<h1 class="page-title">Scrape</h1>
+﻿<div class="scrape-container">
 
-<div class="scrape-container">
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Pretraži..." class="search-input">
+
+        <input type="number" id="minPriceInput" placeholder="Min cena" class="price-input">
+        <input type="number" id="maxPriceInput" placeholder="Max cena" class="price-input">
+
+        <button id="searchBtn" class="search-btn">🔍</button>
+    </div>
+
     <form id="scrapeForm" class="scrape-form">
         <label for="category" class="form-label">Odaberi kategoriju:</label>
         <select name="category" id="category" class="form-select">
@@ -17,11 +25,31 @@
 </div>
 
 <script>
+
     document.getElementById('scrapeForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const category = document.getElementById('category').value;
+
         window.location.href = `/${category}`;
     });
+
+     function handleSearch() {
+        const query = document.getElementById('searchInput').value.trim();
+        const minPrice = document.getElementById('minPriceInput').value;
+        const maxPrice = document.getElementById('maxPriceInput').value;
+
+        if (query === "")
+            return;
+
+        const url = `/Scrape/search-scraping?Query=${encodeURIComponent(query)}&MinPrice=${minPrice}&MaxPrice=${maxPrice}`;
+
+        console.log("Pozivam endpoint:", url);
+
+        window.location.href = url;
+    }
+
+    document.getElementById('searchBtn').addEventListener('click', handleSearch);
+
 </script>
 
 <style>
@@ -43,6 +71,37 @@
         align-items: center;
         padding: 30px;
     }
+
+    .search-bar {
+        display: flex;
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 20px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 10px 12px;
+        font-size: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px 0 0 6px;
+        outline: none;
+    }
+
+    .search-btn {
+        padding: 10px 15px;
+        border: 1px solid #0078d4;
+        background-color: #0078d4;
+        color: #fff;
+        font-size: 16px;
+        border-radius: 0 6px 6px 0;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+        .search-btn:hover {
+            background-color: #005fa3;
+        }
 
     .scrape-form {
         display: flex;

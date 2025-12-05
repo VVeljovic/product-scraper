@@ -71,7 +71,19 @@
                     <input type="number" id="maxCena" name="MaxCena" class="form-control" placeholder="npr. 120000" min="0" />
                 </div>
             </div>
-
+            @if (Model.Filters.SiteNames != null)
+            {
+                <div class="filter-group">
+                    <h4>Odaberi sajtove</h4>
+                    @foreach (var item in Model.Filters.SiteNames)
+                    {
+                        <div class="filter-item">
+                            <input type="checkbox" id="res_@item" name="SiteNames" value="@item" />
+                            <label for="res_@item">@item</label>
+                        </div>
+                    }
+                </div>
+            }
             <button type="submit" class="btn btn-primary w-100 mt-2">Primeni filtere</button>
         </form>
     </aside>
@@ -146,17 +158,7 @@
 <script>
     $('#filterForm').on('submit', function (e) {
         e.preventDefault();
-        var data = $(this).serialize();
-        $.ajax({
-            type: 'POST',
-            url: '@Url.Action("ScrapeDesktops", "Desktops")',
-            data: data,
-            success: function (result) {
-                $('#productsContainer').html(result);
-            },
-            error: function (xhr, status, error) {
-                console.error("Greška pri učitavanju proizvoda:", error);
-            }
-        });
+        var query = $(this).serialize();
+        window.location.href = '/Desktops/ScrapeDesktops?' + query;
     });
 </script>
